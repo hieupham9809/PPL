@@ -44,10 +44,11 @@ fragment DIGIT: [0-9];
 
 CIDENTIFIER: LETTER (LETTER | DIGIT)*;
 
-REAL: DIGIT+ '.' DIGIT+ | DIGIT+ ('.'DIGIT+) 'e' '-'? DIGIT+; 
+REAL: DIGIT* '.' DIGIT+ | DIGIT* ('.'DIGIT+)? 'e' '-'? DIGIT+; 
 
+STRING: '\''(~'\'' | '\'''\'')+ '\'';
 
-
+//STRING: (LETTER+ ('\'''\'')? )+;
 ERROR_CHAR: .;
 UNCLOSE_STRING: .;
 ILLEGAL_ESCAPE: .;

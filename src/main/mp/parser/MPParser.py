@@ -7,7 +7,7 @@ import sys
 
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\22")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\23")
         buf.write("(\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\3\2\3\2\3\2")
         buf.write("\3\2\3\2\3\2\5\2\23\n\2\3\2\3\2\3\2\3\3\3\3\3\4\3\4\3")
         buf.write("\4\3\5\3\5\5\5\37\n\5\3\6\3\6\3\6\5\6$\n\6\3\6\3\6\3\6")
@@ -39,7 +39,8 @@ class MPParser ( Parser ):
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "INTTYPE", "VOIDTYPE", "ID", 
                       "INTLIT", "LB", "RB", "LP", "RP", "SEMI", "WS", "CIDENTIFIER", 
-                      "REAL", "ERROR_CHAR", "UNCLOSE_STRING", "ILLEGAL_ESCAPE" ]
+                      "REAL", "STRING", "ERROR_CHAR", "UNCLOSE_STRING", 
+                      "ILLEGAL_ESCAPE" ]
 
     RULE_program = 0
     RULE_mptype = 1
@@ -63,9 +64,10 @@ class MPParser ( Parser ):
     WS=11
     CIDENTIFIER=12
     REAL=13
-    ERROR_CHAR=14
-    UNCLOSE_STRING=15
-    ILLEGAL_ESCAPE=16
+    STRING=14
+    ERROR_CHAR=15
+    UNCLOSE_STRING=16
+    ILLEGAL_ESCAPE=17
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
