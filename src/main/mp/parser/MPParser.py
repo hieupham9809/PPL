@@ -13,14 +13,14 @@ def serializedATN():
         buf.write("\4\3\5\3\5\5\5\37\n\5\3\6\3\6\3\6\5\6$\n\6\3\6\3\6\3\6")
         buf.write("\2\2\7\2\4\6\b\n\2\3\3\2\4\5\2%\2\f\3\2\2\2\4\27\3\2\2")
         buf.write("\2\6\31\3\2\2\2\b\36\3\2\2\2\n \3\2\2\2\f\r\5\4\3\2\r")
-        buf.write("\16\7\3\2\2\16\17\7\b\2\2\17\20\7\t\2\2\20\22\7\n\2\2")
+        buf.write("\16\7\3\2\2\16\17\7\6\2\2\17\20\7\7\2\2\20\22\7\b\2\2")
         buf.write("\21\23\5\6\4\2\22\21\3\2\2\2\22\23\3\2\2\2\23\24\3\2\2")
-        buf.write("\2\24\25\7\13\2\2\25\26\7\2\2\3\26\3\3\2\2\2\27\30\t\2")
-        buf.write("\2\2\30\5\3\2\2\2\31\32\5\n\6\2\32\33\7\f\2\2\33\7\3\2")
-        buf.write("\2\2\34\37\5\n\6\2\35\37\7\7\2\2\36\34\3\2\2\2\36\35\3")
-        buf.write("\2\2\2\37\t\3\2\2\2 !\7\6\2\2!#\7\b\2\2\"$\5\b\5\2#\"")
-        buf.write("\3\2\2\2#$\3\2\2\2$%\3\2\2\2%&\7\t\2\2&\13\3\2\2\2\5\22")
-        buf.write("\36#")
+        buf.write("\2\24\25\7\t\2\2\25\26\7\2\2\3\26\3\3\2\2\2\27\30\t\2")
+        buf.write("\2\2\30\5\3\2\2\2\31\32\5\n\6\2\32\33\7\n\2\2\33\7\3\2")
+        buf.write("\2\2\34\37\5\n\6\2\35\37\7\22\2\2\36\34\3\2\2\2\36\35")
+        buf.write("\3\2\2\2\37\t\3\2\2\2 !\7\23\2\2!#\7\6\2\2\"$\5\b\5\2")
+        buf.write("#\"\3\2\2\2#$\3\2\2\2$%\3\2\2\2%&\7\7\2\2&\13\3\2\2\2")
+        buf.write("\5\22\36#")
         return buf.getvalue()
 
 
@@ -34,13 +34,13 @@ class MPParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "'main'", "'int'", "'void'", "<INVALID>", 
-                     "<INVALID>", "'('", "')'", "'{'", "'}'", "';'" ]
+    literalNames = [ "<INVALID>", "'main'", "'int'", "'void'", "'('", "')'", 
+                     "'{'", "'}'", "';'" ]
 
-    symbolicNames = [ "<INVALID>", "<INVALID>", "INTTYPE", "VOIDTYPE", "ID", 
-                      "INTLIT", "LB", "RB", "LP", "RP", "SEMI", "WS", "CIDENTIFIER", 
-                      "REAL", "STRING", "ERROR_CHAR", "UNCLOSE_STRING", 
-                      "ILLEGAL_ESCAPE" ]
+    symbolicNames = [ "<INVALID>", "<INVALID>", "INTTYPE", "VOIDTYPE", "LB", 
+                      "RB", "LP", "RP", "SEMI", "WS", "CIDENTIFIER", "REAL", 
+                      "STRING", "ERROR_CHAR", "UNCLOSE_STRING", "ILLEGAL_ESCAPE", 
+                      "INTLIT", "ID" ]
 
     RULE_program = 0
     RULE_mptype = 1
@@ -54,20 +54,20 @@ class MPParser ( Parser ):
     T__0=1
     INTTYPE=2
     VOIDTYPE=3
-    ID=4
-    INTLIT=5
-    LB=6
-    RB=7
-    LP=8
-    RP=9
-    SEMI=10
-    WS=11
-    CIDENTIFIER=12
-    REAL=13
-    STRING=14
-    ERROR_CHAR=15
-    UNCLOSE_STRING=16
-    ILLEGAL_ESCAPE=17
+    LB=4
+    RB=5
+    LP=6
+    RP=7
+    SEMI=8
+    WS=9
+    CIDENTIFIER=10
+    REAL=11
+    STRING=12
+    ERROR_CHAR=13
+    UNCLOSE_STRING=14
+    ILLEGAL_ESCAPE=15
+    INTLIT=16
+    ID=17
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -343,7 +343,7 @@ class MPParser ( Parser ):
             self.state = 33
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==MPParser.ID or _la==MPParser.INTLIT:
+            if _la==MPParser.INTLIT or _la==MPParser.ID:
                 self.state = 32
                 self.exp()
 
