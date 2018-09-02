@@ -8,33 +8,63 @@ options{
 	language=Python3;
 }
 
-//program  : mptype 'main' LB RB LP body? RP EOF ;
+program  : declaration+;
 
-//mptype: INTTYPE | VOIDTYPE ;
+declaration:vardec|funcdec;
 
-//body: funcall SEMI;
+vardec: (INT | FLOAT) idlist SM;
+idlist: ID CM idlist | ID;
 
-//exp: funcall | INTLIT ;
+funcdec: (INT | FLOAT) ID LP parameterdec? RP block SM;
+parameterdec: parameter SM parameterdec | parameter;
+parameter: (INT | FLOAT) parameter_list;
+parameter_list: ID CM parameter_list | ID;
+block: LB (vardec | statement)* RB;
+statement: (assignment | call | return) SM;
+assignment: ID EQ expression;
+call: ID LP expr_list RP;
+expr_list: ID CM expr_list | ID;
+return: RETURN expression?;
 
-//funcall: ID LB exp? RB ;
+expression: exp SM;
+exp: exp1 ADD exp | exp1;
+exp1: exp2 SUB exp2;
+exp2: exp2 (MUL | DIV) exp3 | exp3;
+exp3: LP exp RP | exp4;
+exp4: operand|call;
 
-INTTYPE: 'int' ;
+operand: INTLIT|FLOATLIT|ID|exp3;
 
-VOIDTYPE: 'void'  ;
 
-//ID: [a-zA-Z]+ ;
 
-//INTLIT: [0-9]+;
 
-//LB: '(' ;
 
-//RB: ')' ;
 
-//LP: '{';
 
-//RP: '}';
 
-//SEMI: ';' ;
+LP: '(' ;
+
+RP: ')' ;
+
+LB: '{';
+
+RB: '}';
+
+SM: ';' ;
+
+CM: ',';
+
+EQ: '=';
+
+RETURN: 'return';
+
+ADD: '+';
+
+SUB: '-';
+
+MUL: '*';
+
+DIV: '/';
 
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
 
@@ -42,9 +72,15 @@ fragment LETTER: [a-z];
 
 fragment DIGIT: [0-9];
 
-CIDENTIFIER: LETTER (LETTER | DIGIT)*;
+ID: LETTER (LETTER | DIGIT)*;
 
-REAL: DIGIT* '.' DIGIT+ | DIGIT* ('.'DIGIT+)? 'e' '-'? DIGIT+; 
+FLOATLIT: DIGIT* '.' DIGIT+ | DIGIT* ('.'DIGIT+)? 'e' '-'? DIGIT+; 
+
+INTLIT: [0-9]+;
+
+INT: 'int';
+
+FLOAT: 'float';
 
 STRING: '\''(~'\'' | '\'''\'')+ '\'';
 
