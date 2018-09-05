@@ -8,39 +8,54 @@ options{
 	language=Python3;
 }
 
-program  : declaration+;
+program  : manydeclr;
+manydeclr: declaration manydeclr | declaration;
 
-declaration:vardec|funcdec;
+declaration:varDec|funcDec;
 
-vardec: (INT | FLOAT) idlist SM;
-idlist: ID CM idlist | ID;
+varDec: typeMP idList SM;
+typeMP: INT | FLOAT;
 
-funcdec: (INT | FLOAT) ID LP parameterdec? RP block SM;
-parameterdec: parameter SM parameterdec | parameter;
-parameter: (INT | FLOAT) parameter_list;
-parameter_list: ID CM parameter_list | ID;
-block: LB (vardec | statement)* RB;
-statement: (assignment | call | return) SM;
+idList: ID CM idList | ID;
+
+funcDec: typeMP ID paramDec body;
+paramDec: LP RP | LP smList RP;			
+
+smList: typeMP idList SM smList | typeMP idList;
+body: LB stmtType RB | LB RB;
+
+
+stmtType: (varDec | statement) stmtType |  ;
+statement: (assignment | call | returnMP) SM;
 assignment: ID EQ expression;
-call: ID LP expr_list RP;
-expr_list: ID CM expr_list | ID;
-return: RETURN expression?;
+call: ID LP expressionList? RP;
+expressionList: expression (CM expression)*;
+returnMP: RETURNS expression;
 
-expression: exp SM;
+expression: exp;
 exp: exp1 ADD exp | exp1;
-exp1: exp2 SUB exp2;
-exp2: exp2 (MUL | DIV) exp3 | exp3;
+exp1: exp2 SUB exp2 | exp2;
+
+exp2: exp3 exp0;
+exp0: ((MUL | DIV) exp3)?;
 exp3: LP exp RP | exp4;
 exp4: operand|call;
 
-operand: INTLIT|FLOATLIT|ID|exp3;
+operand: INTLIT|FLOATLIT|ID;
 
 
 
 
+INT: 'int';
+FLOAT: 'float';
+RETURNS: 'return';
 
+fragment LETTER: [a-zA-Z];
+fragment DIGIT: [0-9];
 
-
+ID: LETTER (LETTER | DIGIT)*;
+FLOATLIT: DIGIT* '.' DIGIT+ | DIGIT* ('.'DIGIT+)? 'e' '-'? DIGIT+; 
+INTLIT: DIGIT+;
 
 LP: '(' ;
 
@@ -56,8 +71,6 @@ CM: ',';
 
 EQ: '=';
 
-RETURN: 'return';
-
 ADD: '+';
 
 SUB: '-';
@@ -66,25 +79,11 @@ MUL: '*';
 
 DIV: '/';
 
-WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
-
-fragment LETTER: [a-z];
-
-fragment DIGIT: [0-9];
-
-ID: LETTER (LETTER | DIGIT)*;
-
-FLOATLIT: DIGIT* '.' DIGIT+ | DIGIT* ('.'DIGIT+)? 'e' '-'? DIGIT+; 
-
-INTLIT: [0-9]+;
-
-INT: 'int';
-
-FLOAT: 'float';
 
 STRING: '\''(~'\'' | '\'''\'')+ '\'';
 
+WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
 //STRING: (LETTER+ ('\'''\'')? )+;
-//ERROR_CHAR: .;
-//UNCLOSE_STRING: .;
-//ILLEGAL_ESCAPE: .;
+ERROR_CHAR: .;
+UNCLOSE_STRING: .;
+ILLEGAL_ESCAPE: .;
