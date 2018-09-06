@@ -7,7 +7,7 @@ import sys
 
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\67")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\39")
         buf.write("\7\4\2\t\2\3\2\3\2\3\2\2\2\3\2\2\2\2\5\2\4\3\2\2\2\4\5")
         buf.write("\3\2\2\2\5\3\3\2\2\2\2")
         return buf.getvalue()
@@ -32,7 +32,8 @@ class MPParser ( Parser ):
                      "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                      "<INVALID>", "<INVALID>", "<INVALID>", "'+'", "'*'", 
                      "'<>'", "'<'", "'<='", "'-'", "'/'", "'='", "'>'", 
-                     "'>='", "<INVALID>", "'('", "')'", "'{'", "'}'", "';'" ]
+                     "'>='", "<INVALID>", "<INVALID>", "'('", "')'", "'{'", 
+                     "'}'", "';'", "','" ]
 
     symbolicNames = [ "<INVALID>", "BREAK", "CONTINUE", "FOR", "TO", "DOWNTO", 
                       "DO", "IF", "THEN", "ELSE", "RETURNS", "WHILE", "BEGIN", 
@@ -40,9 +41,9 @@ class MPParser ( Parser ):
                       "ARRAY", "OF", "REAL", "BOOLEAN", "INTEGER", "STRING", 
                       "NOT", "AND", "OR", "DIV", "MOD", "ID", "ADDOP", "MULOP", 
                       "NEQOP", "LTOP", "LTEOP", "SUBOP", "DIVOP", "EQOP", 
-                      "GTOP", "GTEOP", "INTLIT", "LB", "RB", "LP", "RP", 
-                      "SEMI", "WS", "BLOCKCOM_B", "BLOCKCOM_P", "LINECOM", 
-                      "ERROR_CHAR", "UNCLOSE_STRING", "ILLEGAL_ESCAPE" ]
+                      "GTOP", "GTEOP", "INTLIT", "REALIT", "LB", "RB", "LP", 
+                      "RP", "SEMI", "COMMA", "WS", "BLOCKCOM_B", "BLOCKCOM_P", 
+                      "LINECOM", "ERROR_CHAR", "UNCLOSE_STRING", "ILLEGAL_ESCAPE" ]
 
     RULE_program = 0
 
@@ -90,18 +91,20 @@ class MPParser ( Parser ):
     GTOP=39
     GTEOP=40
     INTLIT=41
-    LB=42
-    RB=43
-    LP=44
-    RP=45
-    SEMI=46
-    WS=47
-    BLOCKCOM_B=48
-    BLOCKCOM_P=49
-    LINECOM=50
-    ERROR_CHAR=51
-    UNCLOSE_STRING=52
-    ILLEGAL_ESCAPE=53
+    REALIT=42
+    LB=43
+    RB=44
+    LP=45
+    RP=46
+    SEMI=47
+    COMMA=48
+    WS=49
+    BLOCKCOM_B=50
+    BLOCKCOM_P=51
+    LINECOM=52
+    ERROR_CHAR=53
+    UNCLOSE_STRING=54
+    ILLEGAL_ESCAPE=55
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)

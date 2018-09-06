@@ -17,6 +17,21 @@ class LexerSuite(unittest.TestCase):
         self.assertTrue(TestLexer.test("< =9preOP","<,=,9,preOP,<EOF>",110))
         #self.assertTrue(TestLexer.test("'isn32''t'","'isn32''t',<EOF>",1001))
         
-    #def test_integer(self):
+    def test_integer(self):
         """test integers"""
-        
+        self.assertTrue(TestLexer.test("001","001,<EOF>",111))
+        self.assertTrue(TestLexer.test("001A","001,A,<EOF>",112))
+    def test_real(self):
+        """test reals"""
+        self.assertTrue(TestLexer.test("001","001,<EOF>",113))
+        self.assertTrue(TestLexer.test("1.2","1.2,<EOF>",114))
+        self.assertTrue(TestLexer.test("1.","1.,<EOF>",115))
+        self.assertTrue(TestLexer.test(".1",".1,<EOF>",116))
+        self.assertTrue(TestLexer.test("1e2","1e2,<EOF>",117))
+        self.assertTrue(TestLexer.test("1.2E-2","1.2E-2,<EOF>",118))
+        self.assertTrue(TestLexer.test("1.2e-2","1.2e-2,<EOF>",119))
+        self.assertTrue(TestLexer.test(".1E2",".1E2,<EOF>",120))
+        self.assertTrue(TestLexer.test("9.0","9.0,<EOF>",121))
+        self.assertTrue(TestLexer.test("12e8","12e8,<EOF>",122))
+        self.assertTrue(TestLexer.test("0.33E-3","0.33E-3,<EOF>",123))
+        self.assertTrue(TestLexer.test("128e-42","128e-42,<EOF>",124))

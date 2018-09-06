@@ -54,7 +54,7 @@ class TestLexer:
     def printLexeme(dest,lexer):
         tok = lexer.nextToken()
         if tok.type != Token.EOF:
-            dest.write(tok.text+",") #'''+","+str(tok.type)'''
+            dest.write(tok.text+",") #'''+str(tok.type)+","'''
             TestLexer.printLexeme(dest,lexer)
         else:
             dest.write("<EOF>")
