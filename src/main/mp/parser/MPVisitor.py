@@ -14,25 +14,5 @@ class MPVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by MPParser#mptype.
-    def visitMptype(self, ctx:MPParser.MptypeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by MPParser#body.
-    def visitBody(self, ctx:MPParser.BodyContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by MPParser#exp.
-    def visitExp(self, ctx:MPParser.ExpContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by MPParser#funcall.
-    def visitFuncall(self, ctx:MPParser.FuncallContext):
-        return self.visitChildren(ctx)
-
-
 
 del MPParser

@@ -13,17 +13,18 @@ options{
 	language=Python3;
 }
 
-program  : mptype 'main' LB RB LP body? RP EOF ;
+program  : ;//mptype 'main' LB RB LP body? RP EOF ;
 
-mptype: INTTYPE | VOIDTYPE ;
+/*mptype: INTTYPE | VOIDTYPE ;
 
 body: funcall SEMI;
 
 exp: funcall | INTLIT ;
 
 funcall: ID LB exp? RB ;
-
-fragment A: [Aa];
+*/
+//key insensitive
+fragment A: [aA];
 fragment B: [Bb];
 fragment C: [Cc];
 fragment D: [Dd];
@@ -50,7 +51,7 @@ fragment X: [Xx];
 fragment Y: [Yy];
 fragment Z: [Zz];
 
-
+// keyword
 BREAK: B R E A K;
 CONTINUE: C O N T I N U E;
 FOR: F O R;
@@ -82,9 +83,25 @@ DIV: D I V;
 MOD: M O D;
 
 
-ID: [A-Z_][A-Z0-9_]*;
 
-//ID: ;
+//ID: (A..Z|'_')(A..Z|'0'..'9'|'_')*;
+fragment IDCHAR: (A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z);
+ID: (IDCHAR | '_')(IDCHAR | '_' | '0'..'9')*;
+// Operators
+ADDOP: '+';
+MULOP: '*';
+NEQOP: '<>';
+LTOP: '<';
+LTEOP: '<=';
+SUBOP: '-';
+DIVOP: '/';
+EQOP: '=';
+GTOP: '>';
+GTEOP: '>=';
+
+
+
+
 
 INTLIT: [0-9]+;
 

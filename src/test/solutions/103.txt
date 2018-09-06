@@ -1,1 +1,1 @@
-aas,uio,<EOF>
+AAAA,<EOF>
