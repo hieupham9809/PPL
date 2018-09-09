@@ -13,16 +13,35 @@ options{
 	language=Python3;
 }
 
-program  : ;//mptype 'main' LB RB LP body? RP EOF ;
+program  : declaration+;
+declaration     : varDec | funcDec | procDec;
 
-/*mptype: INTTYPE | VOIDTYPE ;
+varDec          : VAR listOfDecls;
+listOfDecls     : listOfType listOfDecls1;
+listOfDecls1    : SEMI listOfType listOfDecls1 | SEMI;
+listOfType      : listID COLON types ;
+listID          : ID listID1;
+listID1         : COMMA ID listID1 | ;
 
-body: funcall SEMI;
+// type
+types           : BOOLEAN | INTEGER | REAL | STRING | arraycp;
+arraycp         : ARRAY LSB INTLIT DDOT INTLIT RSB OF arrayType;
+arrayType       : BOOLEAN | INTEGER | REAL | STRING;
 
-exp: funcall | INTLIT ;
+// funcDec
+funcDec: ID;
+/*funcDec         : FUNCTION ID LB paramList RB COLON types SEMI varDec? compound_st;
+paramList       : paramDec paramList1 | ;
+paramList1      : SEMI paramDec paramList1 | ;
+paramDec        : listOfType;
+compound_st     : BEGIN statement* END;
 
-funcall: ID LB exp? RB ;
+// statements
+statement       : assign_st | if_st | for_st | while_st | break_st | continue_st | return_st | call_st | compound_st | with_st;
 */
+// procDec
+procDec         : ID;
+
 //key insensitive
 fragment A: [aA];
 fragment B: [bB];
@@ -104,7 +123,17 @@ GTEOP   : '>=';
 // Literals
 fragment DIGIT:  [0-9];
 INTLIT  : DIGIT+;
-REALIT    : ((NUM_HAS_P | DIGIT+) EXPN) | NUM_HAS_P;
+REALIT  : ((NUM_HAS_P | DIGIT+) EXPN) | NUM_HAS_P;
+
+
+//ILLEGAL_ESCAPE: '"' .*? '\\' ~[bfrnt'"\\] ; ////// stuck here
+
+STRLIT  : '"' ~[\n\b\f\r\t]* '"'
+                        {
+                            self.text = self.text[1:len(self.text)-1]
+                        }
+
+;
 //fragment NUM_NP  :  NUM_P | ;
 fragment NUM_HAS_P   :   DIGIT* '.' DIGIT+ | DIGIT+ '.' DIGIT*;   
 fragment EXPN        :   (E '-'?) DIGIT+;
@@ -117,20 +146,29 @@ LB      : '(' ;
 
 RB      : ')' ;
 
-LP      : '{';
-
-RP      : '}';
-
 SEMI    : ';' ;
 
 COMMA   : ',';
 
+LSB     : '[';
+
+RSB     : ']';
+
+COLON   : ':';
+
+DDOT    : '..';
+
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
 
+// Comments
 BLOCKCOM_B: '(*'.*?'*)' ->skip;
 BLOCKCOM_P: '{'.*?'}' -> skip;
 LINECOM: '//'~[\r\n]* ->skip;
 
 ERROR_CHAR: .;
-UNCLOSE_STRING: .;
-ILLEGAL_ESCAPE: .;
+//not already handle
+UNCLOSE_STRING: '"' ~["]*               
+            {
+                self.text = self.text[1:]        
+            };
+//ILLEGAL_ESCAPE: .;
