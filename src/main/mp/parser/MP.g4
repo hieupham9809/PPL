@@ -29,16 +29,49 @@ arraycp         : ARRAY LSB INTLIT DDOT INTLIT RSB OF arrayType;
 arrayType       : BOOLEAN | INTEGER | REAL | STRING;
 
 // funcDec
-funcDec: ID;
-/*funcDec         : FUNCTION ID LB paramList RB COLON types SEMI varDec? compound_st;
+funcDec         : FUNCTION ID LB paramList RB COLON types SEMI varDec? compound_st;
 paramList       : paramDec paramList1 | ;
 paramList1      : SEMI paramDec paramList1 | ;
 paramDec        : listOfType;
 compound_st     : BEGIN statement* END;
 
+// expression
+
+expression  : expression (AND THEN) exp1
+            | expression (OR ELSE) exp1 | exp1;
+exp1        : exp2 (EQOP | NEQOP | LTOP | LTEOP | GTOP | GTEOP) exp2 | exp2;
+exp3        : exp3 (ADDOP | SUBOP | OR) exp4 | exp4;
+exp4        : exp4 (DIVOP | MULOP | DIV | MOD | AND) exp5 | exp5;
+exp5        : (SUBOP | NOT) exp5 | exp6;
+exp6        : exp7 LSB expression RSB | exp7;
+exp7        : LB expression RB | exp8;
+exp8        : operand | funcall;
+operand     : INTLIT | REALIT | STRLIT | ID | BOOLIT;
+
+funcall     : ID LB listOfExp RB;
+listOfExp   : expression listOfExp1 | ;
+listOfExp1  : COMMA expression listOfExp1 | ;
+
 // statements
-statement       : assign_st | if_st | for_st | while_st | break_st | continue_st | return_st | call_st | compound_st | with_st;
-*/
+statement       : assign_st SEMI
+                | if_st 
+                | for_st 
+                | while_st 
+                | break_st SEMI
+                | continue_st SEMI
+                | return_st SEMI
+                | call_st SEMI
+                | compound_st 
+                | with_st;
+assign_st       : lhs ASSIGOP assign_st | expression;
+lhs             : ID | exp6;
+
+while_st        : WHILE expression DO statement;
+for_st          : ID ASSIGOP expression (TO | DOWNTO) expression DO statement; 
+break_st        : BREAK;
+continue_st     : CONTINUE;
+return_st       : RETURNS;
+with_st         : WITH varDec DO statement;
 // procDec
 procDec         : ID;
 
@@ -100,6 +133,7 @@ AND         : A N D;
 OR          : O R;
 DIV         : D I V;
 MOD         : M O D;
+WITH        : W I T H;
 
 
 
@@ -107,6 +141,7 @@ MOD         : M O D;
 fragment IDCHAR: (A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z);
 ID  : (IDCHAR | '_')(IDCHAR | '_' | '0'..'9')*;
 // Operators
+ASSIGOP : ':=';
 ADDOP   : '+';
 MULOP   : '*';
 NEQOP   : '<>';
@@ -124,10 +159,15 @@ GTEOP   : '>=';
 fragment DIGIT:  [0-9];
 INTLIT  : DIGIT+;
 REALIT  : ((NUM_HAS_P | DIGIT+) EXPN) | NUM_HAS_P;
+BOOLIT  : TRUE | FALSE;
 
-
-//ILLEGAL_ESCAPE: '"' .*? '\\' ~[bfrnt'"\\] ; ////// stuck here
-
+/*ILLEGAL_ESCAPE: '"' .*? '\\' ~[bfrnt\'\"\\] 
+                                        {
+                                            self.text = self.text[1:]    
+                                            raise IllegalEscape(self.text)         
+                                        }; ////// stuck here
+*/
+//ILLEGAL_ESCAPE: '"' .*? 
 STRLIT  : '"' ~[\n\b\f\r\t]* '"'
                         {
                             self.text = self.text[1:len(self.text)-1]
@@ -169,6 +209,7 @@ ERROR_CHAR: .;
 //not already handle
 UNCLOSE_STRING: '"' ~["]*               
             {
-                self.text = self.text[1:]        
+                self.text = self.text[1:]    
+                raise UncloseString(self.text)    
             };
 //ILLEGAL_ESCAPE: .;

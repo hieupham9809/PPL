@@ -43,18 +43,20 @@ class LexerSuite(unittest.TestCase):
         self.assertTrue(TestLexer.test("//(*abc","<EOF>",128))
         # add more
 
-    def Atest_string(self):
+    def test_string(self):
         """test strings"""
         #self.assertTrue(TestLexer.test("\"abc\"","abc,<EOF>",135))
         #self.assertTrue(TestLexer.test("\"abc\\nabc\"","abc\\nabc,<EOF>",136))
-        self.assertTrue(TestLexer.test("\"abc\\aabc","abc\\aabc,<EOF>",137))
+        self.assertTrue(TestLexer.test("\"abc\\aabc\"","abc\\a",137))
         self.assertTrue(TestLexer.test("\"abc\\nabc\"","abc\\nabc\",<EOF>",138))
         self.assertTrue(TestLexer.test("\"abc\"","abc\\nabc\",<EOF>",139))
 
-    def test_array(self):
+    def Atest_array(self):
         """test array"""
         #self.assertTrue(TestLexer.test("array [ 1 .. 5 ] of integer","abc\\nabc\",<EOF>",150))
         #self.assertTrue(TestLexer.test("var d:array [ 1 .. 5  of integer","abc\\nabc\",<EOF>",151))
-        self.assertTrue(TestLexer.test("var d:array [1..5] of integer;","abc\\nabc\",<EOF>",152))
-
-
+        self.assertTrue(TestLexer.test("var d:array [1..5] of integer;","var,d,:,array,[,1.,.5,],of,integer,;,<EOF>",152))
+    def Atest_unclosed_string(self):
+        """unclosed sring"""
+        self.assertTrue(TestLexer.test("\"var d:array [1..5] of integer;","Unclosed String: var d:array [1..5] of integer;",153))
+        self.assertTrue(TestLexer.test("\"var d:array [1..5] \n of integer;","Unclosed String: var d:array [1..5] of integer;",154))
