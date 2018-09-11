@@ -47,9 +47,10 @@ class LexerSuite(unittest.TestCase):
         """test strings"""
         #self.assertTrue(TestLexer.test("\"abc\"","abc,<EOF>",135))
         #self.assertTrue(TestLexer.test("\"abc\\nabc\"","abc\\nabc,<EOF>",136))
-        self.assertTrue(TestLexer.test("\"abc\\aabc\"","abc\\a",137))
-        self.assertTrue(TestLexer.test("\"abc\\nabc\"","abc\\nabc\",<EOF>",138))
-        self.assertTrue(TestLexer.test("\"abc\"","abc\\nabc\",<EOF>",139))
+        self.assertTrue(TestLexer.test("\"abc\\aabc","Illegal Escape In String: abc\\a",137))
+        #self.assertTrue(TestLexer.test("\"abc\\nabc\"","abc\\nabc,<EOF>",138))
+        #self.assertTrue(TestLexer.test("""abc""","abc,<EOF>",139))
+        self.assertTrue(TestLexer.test("""a$bc""","a$bc,<EOF>",140))
 
     def Atest_array(self):
         """test array"""
@@ -60,3 +61,5 @@ class LexerSuite(unittest.TestCase):
         """unclosed sring"""
         self.assertTrue(TestLexer.test("\"var d:array [1..5] of integer;","Unclosed String: var d:array [1..5] of integer;",153))
         self.assertTrue(TestLexer.test("\"var d:array [1..5] \n of integer;","Unclosed String: var d:array [1..5] of integer;",154))
+    def Atest_simple_program(self):
+        self.assertTrue(TestLexer.test("int main() {}","<EOF>",155))

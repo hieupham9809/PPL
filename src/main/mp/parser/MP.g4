@@ -35,22 +35,23 @@ paramList1      : SEMI paramDec paramList1 | ;
 paramDec        : listOfType;
 compound_st     : BEGIN statement* END;
 
+// procDec
+procDec         : PROCEDURE ID LB paramList RB SEMI varDec? compound_st;
+
 // expression
 
 expression  : expression (AND THEN) exp1
             | expression (OR ELSE) exp1 | exp1;
 exp1        : exp2 (EQOP | NEQOP | LTOP | LTEOP | GTOP | GTEOP) exp2 | exp2;
-exp3        : exp3 (ADDOP | SUBOP | OR) exp4 | exp4;
-exp4        : exp4 (DIVOP | MULOP | DIV | MOD | AND) exp5 | exp5;
-exp5        : (SUBOP | NOT) exp5 | exp6;
-exp6        : exp7 LSB expression RSB | exp7;
-exp7        : LB expression RB | exp8;
-exp8        : operand | funcall;
+exp2        : exp2 (ADDOP | SUBOP | OR) exp3 | exp3;
+exp3        : exp3 (DIVOP | MULOP | DIV | MOD | AND) exp4 | exp4;
+exp4        : (SUBOP | NOT) exp4 | exp5;
+exp5        : exp6 LSB expression RSB | exp6;
+exp6        : LB expression RB | exp7;
+exp7        : operand | call_st;
 operand     : INTLIT | REALIT | STRLIT | ID | BOOLIT;
 
-funcall     : ID LB listOfExp RB;
-listOfExp   : expression listOfExp1 | ;
-listOfExp1  : COMMA expression listOfExp1 | ;
+
 
 // statements
 statement       : assign_st SEMI
@@ -64,7 +65,7 @@ statement       : assign_st SEMI
                 | compound_st 
                 | with_st;
 assign_st       : lhs ASSIGOP assign_st | expression;
-lhs             : ID | exp6;
+lhs             : ID | exp5;
 
 while_st        : WHILE expression DO statement;
 for_st          : ID ASSIGOP expression (TO | DOWNTO) expression DO statement; 
@@ -72,8 +73,12 @@ break_st        : BREAK;
 continue_st     : CONTINUE;
 return_st       : RETURNS;
 with_st         : WITH varDec DO statement;
-// procDec
-procDec         : ID;
+
+call_st         : ID LB listOfExp RB;
+listOfExp       : expression listOfExp1 | ;
+listOfExp1      : COMMA expression listOfExp1 | ;
+
+if_st           : IF expression THEN statement (ELSE statement)?;
 
 //key insensitive
 fragment A: [aA];
@@ -161,16 +166,27 @@ INTLIT  : DIGIT+;
 REALIT  : ((NUM_HAS_P | DIGIT+) EXPN) | NUM_HAS_P;
 BOOLIT  : TRUE | FALSE;
 
-/*ILLEGAL_ESCAPE: '"' .*? '\\' ~[bfrnt\'\"\\] 
+//ILLEGAL_ESCAPE: '"' .*? '\\' ~[bfrnt'"\\] 
+//ILLEGAL_ESCAPE:'"' ('\\' ~[btnfr"'\\] | ~'\\')*
+ILLEGAL_ESCAPE: '"' (~('\\') | '\\' ~[bfrnt'"\\] )*
                                         {
-                                            self.text = self.text[1:]    
-                                            raise IllegalEscape(self.text)         
+                                            whole_str = self.text[1:-1] 
+                                            out_str = ""
+                                            legal = ['b','t','n','f','r','"','\'','\\']
+                                            for i in range(len(whole_str)):
+                                                if whole_str[i] == '\\':
+                                                    if not whole_str[i+1] in legal:
+                                                        out_str = whole_str[0:i+2]
+                                                        break
+                                                 
+
+                                            raise IllegalEscape(out_str)         
                                         }; ////// stuck here
-*/
-//ILLEGAL_ESCAPE: '"' .*? 
-STRLIT  : '"' ~[\n\b\f\r\t]* '"'
+
+
+STRLIT  : '"' ~[\n\b\f\r\t"']* '"'
                         {
-                            self.text = self.text[1:len(self.text)-1]
+                            self.text = self.text[1:-1]
                         }
 
 ;
@@ -205,9 +221,13 @@ BLOCKCOM_B: '(*'.*?'*)' ->skip;
 BLOCKCOM_P: '{'.*?'}' -> skip;
 LINECOM: '//'~[\r\n]* ->skip;
 
-ERROR_CHAR: .;
+ERROR_TOKEN: .
+            {
+                raise ErrorToken(self.text)    
+            };
 //not already handle
-UNCLOSE_STRING: '"' ~["]*               
+
+UNCLOSE_STRING: '"' ~["\n]*              
             {
                 self.text = self.text[1:]    
                 raise UncloseString(self.text)    
