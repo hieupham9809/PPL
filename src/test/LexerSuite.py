@@ -47,19 +47,30 @@ class LexerSuite(unittest.TestCase):
         """test strings"""
         #self.assertTrue(TestLexer.test("\"abc\"","abc,<EOF>",135))
         #self.assertTrue(TestLexer.test("\"abc\\nabc\"","abc\\nabc,<EOF>",136))
-        self.assertTrue(TestLexer.test("\"abc\\aabc","Illegal Escape In String: abc\\a",137))
+        self.assertTrue(TestLexer.test('"a\\aabc"' ,"Illegal Escape In String: abc\\a",137))
         #self.assertTrue(TestLexer.test("\"abc\\nabc\"","abc\\nabc,<EOF>",138))
-        #self.assertTrue(TestLexer.test("""abc""","abc,<EOF>",139))
-        self.assertTrue(TestLexer.test("""a$bc""","a$bc,<EOF>",140))
+        self.assertTrue(TestLexer.test("\"abc\\\"","Unclosed String: abc\\",139))
+        #self.assertTrue(TestLexer.test("\"ab\\\"c\"","abc,<EOF>",140))
+        #self.assertTrue(TestLexer.test(""" "a$bc" ""","a$bc,<EOF>",141))
+        #self.assertTrue(TestLexer.test("\"ab\"c\"","abc,<EOF>",142))
+        self.assertTrue(TestLexer.test("\"ab\\\\c\"","ab\\\\c,<EOF>",143))
 
     def Atest_array(self):
         """test array"""
         #self.assertTrue(TestLexer.test("array [ 1 .. 5 ] of integer","abc\\nabc\",<EOF>",150))
         #self.assertTrue(TestLexer.test("var d:array [ 1 .. 5  of integer","abc\\nabc\",<EOF>",151))
-        self.assertTrue(TestLexer.test("var d:array [1..5] of integer;","var,d,:,array,[,1.,.5,],of,integer,;,<EOF>",152))
+        self.assertTrue(TestLexer.test("var d:array [1 .. 5] of integer;","var,d,:,array,[,1,..,5,],of,integer,;,<EOF>",152))
     def Atest_unclosed_string(self):
         """unclosed sring"""
-        self.assertTrue(TestLexer.test("\"var d:array [1..5] of integer;","Unclosed String: var d:array [1..5] of integer;",153))
-        self.assertTrue(TestLexer.test("\"var d:array [1..5] \n of integer;","Unclosed String: var d:array [1..5] of integer;",154))
+        self.assertTrue(TestLexer.test("\"abc","Unclosed String: abc",153))
+        self.assertTrue(TestLexer.test("\"var d:array [1 .. 5] of integer;","Unclosed String: var d:array [1 .. 5] of integer;",154))
+        self.assertTrue(TestLexer.test("\"var d:array [1 .. 5]\n of integer;","Unclosed String: var d:array [1 .. 5]\n",155))           ### \n co nam trong solution k?
     def Atest_simple_program(self):
-        self.assertTrue(TestLexer.test("int main() {}","<EOF>",155))
+        self.assertTrue(TestLexer.test("int main() {}","<EOF>",156))
+
+    def Atest_statement(self):
+        self.assertTrue(TestLexer.test("if (x > 3) then x = x + 1;","if,(,x,>,3,),then,x,=,x,+,1,;,<EOF>",165))
+
+    def Atest_expression(self):
+        #self.assertTrue(TestLexer.test("x + 3","Unclosed String: abc",175))
+        self.assertTrue(TestLexer.test("\"abc123\"","Unclosed String: abc",176))

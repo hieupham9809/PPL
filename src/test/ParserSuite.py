@@ -33,7 +33,99 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
         self.assertTrue(TestParser.test(input,expect,205))
 
+        input = """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+        begin 
+        x := y + 1;
 
+        end"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input,expect,206))
+
+        input = """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+        begin 
+        a := b [10] := foo()[3] := x := 1 ;
+
+        end"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input,expect,213))
+
+        input = """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+        begin 
+        a := b [10] := 3 := x := 1 ;
+
+        end"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input,expect,214))
+
+        input = """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+            z: array[2 .. 3] of integer;
+        begin 
+        x := y + 1;
+        x := z[2];
+        end"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input,expect,207))
+
+        input = """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+            z: array[2 .. 3] of integer;
+        begin 
+        x := y + 1;
+        x := z[2];
+        foo(x);
+        foo(2)[3+x] := a[b[2]] +3;
+        end"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input,expect,208))
+
+        # if then statement
+        input = """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+            z: array[2 .. 3] of integer;
+        begin 
+        if 5>6 then x := y;
+        end"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input,expect,209))
+
+        #if then else statement
+        input = """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+            z: array[2 .. 3] of integer;
+        begin 
+        if (5>6) then x := y; else y := x;
+        
+        end"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input,expect,210))
+
+        # if then else nested statement
+        input = """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+            z: array[2 .. 3] of integer;
+        begin 
+        if (5>6) then x := y; else 
+            if (true) then y:=x;
+        
+        end"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input,expect,211))
+
+        #  statement
+        input = """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+            z: array[2 .. 3] of integer;
+        begin 
+        if (5>6) then x := y; else 
+            if (true) then y:=x;
+        
+        end"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input,expect,212))
     def test_wrong_miss_close(self):
         """Miss ) """
         input = """procedure foo(a,b:integer; c:real;
@@ -52,18 +144,18 @@ class ParserSuite(unittest.TestCase):
         """array type"""
         input = """var d:array [ 1 .. 5 ] of integer;"""
         expect = "successful"
-        self.assertTrue(TestParser.test(input,expect,206))
+        self.assertTrue(TestParser.test(input,expect,220))
         
         input = """var d:array [ 1 .. 5  of integer;"""
         expect = "Error on line 1 col 22: of"
-        self.assertTrue(TestParser.test(input,expect,207))
+        self.assertTrue(TestParser.test(input,expect,221))
         
         input = """var d:array [1 .. 5] of integer; a,b,c: integer; e,f: real;"""
         expect = "successful"
-        self.assertTrue(TestParser.test(input,expect,208))
+        self.assertTrue(TestParser.test(input,expect,222))
         
         input = """var d:array [1 .. 5] of integer;\n a,b,c: integer;\n e,f: real;"""
         expect = "successful"
-        self.assertTrue(TestParser.test(input,expect,209))
+        self.assertTrue(TestParser.test(input,expect,223))
 
     #def test_expression(self):

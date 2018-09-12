@@ -25,7 +25,7 @@ listID1         : COMMA ID listID1 | ;
 
 // type
 types           : BOOLEAN | INTEGER | REAL | STRING | arraycp;
-arraycp         : ARRAY LSB INTLIT DDOT INTLIT RSB OF arrayType;
+arraycp         : ARRAY LSB expression DDOT expression RSB OF arrayType;
 arrayType       : BOOLEAN | INTEGER | REAL | STRING;
 
 // funcDec
@@ -40,19 +40,30 @@ procDec         : PROCEDURE ID LB paramList RB SEMI varDec? compound_st;
 
 // expression
 
+
 expression  : expression (AND THEN) exp1
             | expression (OR ELSE) exp1 | exp1;
 exp1        : exp2 (EQOP | NEQOP | LTOP | LTEOP | GTOP | GTEOP) exp2 | exp2;
 exp2        : exp2 (ADDOP | SUBOP | OR) exp3 | exp3;
 exp3        : exp3 (DIVOP | MULOP | DIV | MOD | AND) exp4 | exp4;
 exp4        : (SUBOP | NOT) exp4 | exp5;
-exp5        : exp6 LSB expression RSB | exp6;
+exp5        : exp5 LSB expression RSB | exp6;
 exp6        : LB expression RB | exp7;
-exp7        : operand | call_st;
+exp7        : operand | call_st ;
 operand     : INTLIT | REALIT | STRLIT | ID | BOOLIT;
 
-
-
+/*
+expression  : expression (AND THEN) exp1
+            | expression (OR ELSE) exp1 | exp1;
+exp1        : exp2 (EQOP | NEQOP | LTOP | LTEOP | GTOP | GTEOP) exp2 | exp2;
+exp2        : exp2 (ADDOP | SUBOP | OR) exp3 | exp3;
+exp3        : exp3 (DIVOP | MULOP | DIV | MOD | AND) exp4 | exp4;
+exp4        : (SUBOP | NOT) exp4 | exp6;
+exp6        : LB expression RB | exp7;
+exp7        : operand | call_st | index_exp;
+index_exp       : expression LSB expression RSB;
+operand     : INTLIT | REALIT | STRLIT | ID | BOOLIT;
+*/
 // statements
 statement       : assign_st SEMI
                 | if_st 
@@ -68,11 +79,11 @@ assign_st       : lhs ASSIGOP assign_st | expression;
 lhs             : ID | exp5;
 
 while_st        : WHILE expression DO statement;
-for_st          : ID ASSIGOP expression (TO | DOWNTO) expression DO statement; 
+for_st          : FOR ID ASSIGOP expression (TO | DOWNTO) expression DO statement; 
 break_st        : BREAK;
 continue_st     : CONTINUE;
-return_st       : RETURNS;
-with_st         : WITH varDec DO statement;
+return_st       : RETURNS expression? ;
+with_st         : WITH listOfDecls DO statement;
 
 call_st         : ID LB listOfExp RB;
 listOfExp       : expression listOfExp1 | ;
@@ -125,8 +136,8 @@ END         : E N D;
 FUNCTION    : F U N C T I O N;
 PROCEDURE   : P R O C E D U R E;
 VAR         : V A R;
-TRUE        : T R U E;
-FALSE       : F A L S E;
+fragment TRUE        : T R U E;
+fragment FALSE       : F A L S E;
 ARRAY       : A R R A Y;
 OF          : O F;
 REAL        : R E A L;
@@ -168,8 +179,8 @@ BOOLIT  : TRUE | FALSE;
 
 //ILLEGAL_ESCAPE: '"' .*? '\\' ~[bfrnt'"\\] 
 //ILLEGAL_ESCAPE:'"' ('\\' ~[btnfr"'\\] | ~'\\')*
-ILLEGAL_ESCAPE: '"' (~('\\') | '\\' ~[bfrnt'"\\] )*
-                                        {
+ILLEGAL_ESCAPE: UNCLOSE_STRING ('\\' ~[bfrnt'"])
+                                       /* {
                                             whole_str = self.text[1:-1] 
                                             out_str = ""
                                             legal = ['b','t','n','f','r','"','\'','\\']
@@ -181,10 +192,12 @@ ILLEGAL_ESCAPE: '"' (~('\\') | '\\' ~[bfrnt'"\\] )*
                                                  
 
                                             raise IllegalEscape(out_str)         
-                                        }; ////// stuck here
+                                        } */; ////// stuck here
 
 
-STRLIT  : '"' ~[\n\b\f\r\t"']* '"'
+//STRLIT  : '"' (~[\n\b\f\r\t'"] | '\\\"')* '"'
+//STRLIT  : '"' (~[\n\b\f\r\t'"] | ('\\' [bfrnt'"\\]))* ~'\\' '"'
+STRLIT      : UNCLOSE_STRING '"'
                         {
                             self.text = self.text[1:-1]
                         }
@@ -226,10 +239,24 @@ ERROR_TOKEN: .
                 raise ErrorToken(self.text)    
             };
 //not already handle
-
+/*
 UNCLOSE_STRING: '"' ~["\n]*              
             {
                 self.text = self.text[1:]    
                 raise UncloseString(self.text)    
             };
+*/
+
+UNCLOSE_STRING: '"' (~["'\n\b\f\r\t] | ('\\' ["'nbfrt]))*              
+            {
+                self.text = self.text[1:]    
+                raise UncloseString(self.text)    
+            };
 //ILLEGAL_ESCAPE: .;
+
+/*
+    issues:
++ "abc"xyz": illegal escape chưa bắt được " (142)
++ index expression exp5
+
+*/
