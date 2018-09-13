@@ -1,3 +1,5 @@
-proceDure main () ;BEGIN
-            putIntLn(4);
-        end
+FUNcTioN foo(a, b: integer ; g: real):array [5 .. 7] of integer;
+                  var x,y,z,k: real ;
+                  BEGIN
+
+                  END

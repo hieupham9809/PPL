@@ -13,7 +13,7 @@ options{
 	language=Python3;
 }
 
-program  : declaration+;
+program  : declaration+ EOF;
 declaration     : varDec | funcDec | procDec;
 
 varDec          : VAR listOfDecls;
@@ -24,6 +24,7 @@ listID          : ID listID1;
 listID1         : COMMA ID listID1 | ;
 
 // type
+
 types           : BOOLEAN | INTEGER | REAL | STRING | arraycp;
 arraycp         : ARRAY LSB expression DDOT expression RSB OF arrayType;
 arrayType       : BOOLEAN | INTEGER | REAL | STRING;
@@ -51,18 +52,17 @@ exp5        : exp5 LSB expression RSB | exp6;
 exp6        : LB expression RB | exp7;
 exp7        : operand | call_st ;
 operand     : INTLIT | REALIT | STRLIT | ID | BOOLIT;
-
 /*
-expression  : expression (AND THEN) exp1
-            | expression (OR ELSE) exp1 | exp1;
-exp1        : exp2 (EQOP | NEQOP | LTOP | LTEOP | GTOP | GTEOP) exp2 | exp2;
-exp2        : exp2 (ADDOP | SUBOP | OR) exp3 | exp3;
-exp3        : exp3 (DIVOP | MULOP | DIV | MOD | AND) exp4 | exp4;
-exp4        : (SUBOP | NOT) exp4 | exp6;
-exp6        : LB expression RB | exp7;
-exp7        : operand | call_st | index_exp;
-index_exp       : expression LSB expression RSB;
-operand     : INTLIT | REALIT | STRLIT | ID | BOOLIT;
+expression2  : expression2 (AND THEN) exp11
+            | expression2 (OR ELSE) exp11 | exp11;
+exp11        : exp22 (EQOP | NEQOP | LTOP | LTEOP | GTOP | GTEOP) exp22 | exp22;
+exp22        : exp22 (ADDOP | SUBOP | OR) exp33 | exp33;
+exp33        : exp33 (DIVOP | MULOP | DIV | MOD | AND) exp44 | exp44;
+exp44        : (SUBOP | NOT) exp44 | exp55;
+exp55        : exp55 LSB expression RSB | exp66;
+exp66        : LB expression RB | exp77;
+exp77        : operand2 | call_st ;
+operand2     : ID ;
 */
 // statements
 statement       : assign_st SEMI
@@ -193,11 +193,10 @@ STRLIT      : UNCLOSE_STRING '"'
 ILLEGAL_ESCAPE: UNCLOSE_STRING ('\\' ~[bfn"'])
                                             {
                                                 raise IllegalEscape(self.text[1:])
-                                            }; ////// stuck here
+                                            }; 
 
 
-//STRLIT  : '"' (~[\n\b\f\r\t'"] | '\\\"')* '"'
-//STRLIT  : '"' (~[\n\b\f\r\t'"] | ('\\' [bfrnt'"\\]))* ~'\\' '"'
+
 
 
 
@@ -246,11 +245,5 @@ UNCLOSE_STRING: '"' ~["\n]*
 */
 
 
-//ILLEGAL_ESCAPE: .;
 
-/*
-    issues:
-+ "abc"xyz": illegal escape chưa bắt được " (142)
-+ index expression exp5
 
-*/
