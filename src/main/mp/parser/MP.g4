@@ -179,30 +179,28 @@ BOOLIT  : TRUE | FALSE;
 
 //ILLEGAL_ESCAPE: '"' .*? '\\' ~[bfrnt'"\\] 
 //ILLEGAL_ESCAPE:'"' ('\\' ~[btnfr"'\\] | ~'\\')*
-ILLEGAL_ESCAPE: UNCLOSE_STRING ('\\' ~[bfrnt'"])
-                                       /* {
-                                            whole_str = self.text[1:-1] 
-                                            out_str = ""
-                                            legal = ['b','t','n','f','r','"','\'','\\']
-                                            for i in range(len(whole_str)):
-                                                if whole_str[i] == '\\':
-                                                    if not whole_str[i+1] in legal:
-                                                        out_str = whole_str[0:i+2]
-                                                        break
-                                                 
 
-                                            raise IllegalEscape(out_str)         
-                                        } */; ////// stuck here
+UNCLOSE_STRING: '"' (~["'\n\b\f\\] | ('\\' ["'nbf\\]))*              
+            {
+                self.text = self.text[1:]    
+                raise UncloseString(self.text)    
+            };
+STRLIT      : UNCLOSE_STRING '"'
+                        {
+                            self.text = self.text[1:-1]
+                        };
+
+ILLEGAL_ESCAPE: UNCLOSE_STRING ('\\' ~[bfn"'])
+                                            {
+                                                raise IllegalEscape(self.text[1:])
+                                            }; ////// stuck here
 
 
 //STRLIT  : '"' (~[\n\b\f\r\t'"] | '\\\"')* '"'
 //STRLIT  : '"' (~[\n\b\f\r\t'"] | ('\\' [bfrnt'"\\]))* ~'\\' '"'
-STRLIT      : UNCLOSE_STRING '"'
-                        {
-                            self.text = self.text[1:-1]
-                        }
 
-;
+
+
 //fragment NUM_NP  :  NUM_P | ;
 fragment NUM_HAS_P   :   DIGIT* '.' DIGIT+ | DIGIT+ '.' DIGIT*;   
 fragment EXPN        :   (E '-'?) DIGIT+;
@@ -247,11 +245,7 @@ UNCLOSE_STRING: '"' ~["\n]*
             };
 */
 
-UNCLOSE_STRING: '"' (~["'\n\b\f\r\t] | ('\\' ["'nbfrt]))*              
-            {
-                self.text = self.text[1:]    
-                raise UncloseString(self.text)    
-            };
+
 //ILLEGAL_ESCAPE: .;
 
 /*

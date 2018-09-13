@@ -45,14 +45,14 @@ class LexerSuite(unittest.TestCase):
 
     def test_string(self):
         """test strings"""
-        #self.assertTrue(TestLexer.test("\"abc\"","abc,<EOF>",135))
-        #self.assertTrue(TestLexer.test("\"abc\\nabc\"","abc\\nabc,<EOF>",136))
-        self.assertTrue(TestLexer.test('"a\\aabc"' ,"Illegal Escape In String: abc\\a",137))
+        self.assertTrue(TestLexer.test("\"abc\"","abc,<EOF>",135))
+        self.assertTrue(TestLexer.test(""" "abc\\nabc" ""","abc\\nabc,<EOF>",136))
+        self.assertTrue(TestLexer.test(""" "abc\\aabc" """ ,"Illegal Escape In String: abc\\a",137))
         #self.assertTrue(TestLexer.test("\"abc\\nabc\"","abc\\nabc,<EOF>",138))
-        self.assertTrue(TestLexer.test("\"abc\\\"","Unclosed String: abc\\",139))
-        #self.assertTrue(TestLexer.test("\"ab\\\"c\"","abc,<EOF>",140))
+        self.assertTrue(TestLexer.test("\"abc\\\"","Unclosed String: abc\\\"",139))
+        self.assertTrue(TestLexer.test("\"ab\\\"c\"","ab\\\"c,<EOF>",140))
         #self.assertTrue(TestLexer.test(""" "a$bc" ""","a$bc,<EOF>",141))
-        #self.assertTrue(TestLexer.test("\"ab\"c\"","abc,<EOF>",142))
+        self.assertTrue(TestLexer.test(""" "ab"c" ""","ab,c,Unclosed String:  ",142))
         self.assertTrue(TestLexer.test("\"ab\\\\c\"","ab\\\\c,<EOF>",143))
 
     def Atest_array(self):
@@ -71,6 +71,6 @@ class LexerSuite(unittest.TestCase):
     def Atest_statement(self):
         self.assertTrue(TestLexer.test("if (x > 3) then x = x + 1;","if,(,x,>,3,),then,x,=,x,+,1,;,<EOF>",165))
 
-    def Atest_expression(self):
+    def test_expression(self):
         #self.assertTrue(TestLexer.test("x + 3","Unclosed String: abc",175))
-        self.assertTrue(TestLexer.test("\"abc123\"","Unclosed String: abc",176))
+        self.assertTrue(TestLexer.test("var i: integer;\n)()","Unclosed String: abc",176))
