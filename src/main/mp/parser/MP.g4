@@ -1,6 +1,6 @@
 /* 
-    NAME: Pham Minh Hieu
     ID: 1611046 
+    NAME: Pham Minh Hieu
 */
 
 grammar MP;
@@ -26,7 +26,7 @@ listID1         : COMMA ID listID1 | ;
 // type
 
 types           : BOOLEAN | INTEGER | REAL | STRING | arraycp;
-arraycp         : ARRAY LSB expression DDOT expression RSB OF arrayType;
+arraycp         : ARRAY LSB SUBOP? INTLIT DDOT SUBOP? INTLIT RSB OF arrayType;
 arrayType       : BOOLEAN | INTEGER | REAL | STRING;
 
 // funcDec
@@ -52,6 +52,10 @@ exp5        : exp5 LSB expression RSB | exp6;
 exp6        : LB expression RB | exp7;
 exp7        : operand | call_st ;
 operand     : INTLIT | REALIT | STRLIT | ID | BOOLIT;
+
+
+
+indexEx : exp5 LSB expression RSB;
 /*
 expression2  : expression2 (AND THEN) exp11
             | expression2 (OR ELSE) exp11 | exp11;
@@ -75,8 +79,10 @@ statement       : assign_st SEMI
                 | call_st SEMI
                 | compound_st 
                 | with_st;
-assign_st       : lhs ASSIGOP assign_st | expression;
-lhs             : ID | exp5;
+
+assign_st       : lhs ASSIGOP (assign_st | expression);
+             
+lhs             : ID | indexEx ;
 
 while_st        : WHILE expression DO statement;
 for_st          : FOR ID ASSIGOP expression (TO | DOWNTO) expression DO statement; 
@@ -153,7 +159,7 @@ WITH        : W I T H;
 
 
 
-//ID: (A..Z|'_')(A..Z|'0'..'9'|'_')*;
+
 fragment IDCHAR: (A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z);
 ID  : (IDCHAR | '_')(IDCHAR | '_' | '0'..'9')*;
 // Operators
@@ -177,8 +183,7 @@ INTLIT  : DIGIT+;
 REALIT  : ((NUM_HAS_P | DIGIT+) EXPN) | NUM_HAS_P;
 BOOLIT  : TRUE | FALSE;
 
-//ILLEGAL_ESCAPE: '"' .*? '\\' ~[bfrnt'"\\] 
-//ILLEGAL_ESCAPE:'"' ('\\' ~[btnfr"'\\] | ~'\\')*
+
 
 UNCLOSE_STRING: '"' (~["'\n\b\f\\] | ('\\' ["'nbf\\]))*              
             {
@@ -200,7 +205,7 @@ ILLEGAL_ESCAPE: UNCLOSE_STRING ('\\' ~[bfn"'])
 
 
 
-//fragment NUM_NP  :  NUM_P | ;
+
 fragment NUM_HAS_P   :   DIGIT* '.' DIGIT+ | DIGIT+ '.' DIGIT*;   
 fragment EXPN        :   (E '-'?) DIGIT+;
 
@@ -235,14 +240,7 @@ ERROR_TOKEN: .
             {
                 raise ErrorToken(self.text)    
             };
-//not already handle
-/*
-UNCLOSE_STRING: '"' ~["\n]*              
-            {
-                self.text = self.text[1:]    
-                raise UncloseString(self.text)    
-            };
-*/
+
 
 
 

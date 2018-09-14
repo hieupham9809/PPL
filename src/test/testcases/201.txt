@@ -1,4 +1,6 @@
-function foo(a: integer; c: real) : array [ 1 .. 2 ] of integer;
+function foo(a: integer; c: real) : array [ 1 .. 20 ] of integer;
         var m, n : real;
-        begin 
+        p : integer;
+        begin
+
         end

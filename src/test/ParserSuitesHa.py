@@ -335,10 +335,10 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
         self.assertTrue(TestParser.test(input,expect,237))
     def test_call_statement3(self):
-        input = """function foo(c: real): integer;
+        input = """function foo(c: real; d: foo1()): integer;
                    BEGIN
-                    foo(3,a+1,x and then y,a[1],foo(1,2)[m+1]);
-                    return foo2();
+                    c := d;
+                    return c;
                    END"""
         expect = "successful"
         self.assertTrue(TestParser.test(input,expect,238))
@@ -361,12 +361,15 @@ class ParserSuite(unittest.TestCase):
         self.assertTrue(TestParser.test(input,expect,240))
     def test_multi1(self):
         input = """
-                procedure test1() ;
+                procedure test() ;
                 begin
 	               if a=b then
 	               begin
 		                 b := c ;
 		                 if(e <> f) then foo(a,c) ;
+                    if a=b then if c=d then while (d=e) do
+                   beGin
+                   eND
 	               end
                 end
                 """
@@ -444,16 +447,12 @@ class ParserSuite(unittest.TestCase):
 
     def test_multi6(self):
         input = """
-                Var name, surname: String;
+                Var name: String;
                 Procedure Main();
                 Begin
-	               write("Nhap ten cua ban:");
-	               readln(name);
-	               write("Nhap ho cua ban:");
-	               readln(surname);
-	               writeln();(*new line*)
-	               writeln();//new line}
-	               writeln("Ten day du cua ban la : ",name," ",surname);
+	               (*this is line*)
+	               writeln();//this is new line}
+	               writeln(name)
 	               readln();
                 End
                 """
@@ -702,13 +701,15 @@ class ParserSuite(unittest.TestCase):
         self.assertTrue(TestParser.test(input,expect,262))
     def test_multi23(self):
         input = """
-                function fibo(x: integer): integer;
+                function fibonacy(x: integer): integer;
                 var f1,f2: integer;
+                temp: integer;
                 Begin
                  if x<=2 then
                   return 1;
                  else
-                  return fibo(x-2)+ fibo(x-1);
+                  temp := fibonacy(x-2)+ fibonacy(x-1);
+                  return temp;
                 end
                 """
         expect = "successful"

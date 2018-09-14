@@ -1,22 +1,15 @@
 {
     "version": "2.0.0",
     "configurations": [
-        
-        {
-            "type": "antlr-debug",
-            "request": "launch",
-            "name": "Run Parser",
-            "input": "${workspaceFolder}/Input",
-            "visualParseTree": true
-        },
+
         {
             "name": "antlr4-mysql",
             "type": "antlr-debug",
             "request": "launch",
             //"input": "${workspaceFolder}/${command:AskForTestInput}",
-            "input": "D:\\HOC\\PPL\\assignment1\\Exercise1\\src\\test\\testcases\\257.txt",
-            "grammar": "D:\\HOC\\PPL\\assignment1\\Exercise1\\src\\main\\mp\\parser\\MP.g4",
-            "startRule": "program",
+            "input": "D:\\HOC\\PPL\\assignment1\\Exercise1\\src\\test\\testcases\\204.txt",
+            "grammar": "grammars/MySQLParser.g4",
+            "startRule": "query",
             "printParseTree": true,
             "visualParseTree": true
         }

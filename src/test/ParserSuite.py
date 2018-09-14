@@ -1,34 +1,41 @@
 import unittest
 from TestUtils import TestParser
 
+
 class ParserSuite(unittest.TestCase):
-    def test_function_dec_1(self):
-        """function foo(a: integer; c: real) : array [ 1 .. 2 ] of integer;
+    def test_function_DECLARE_non_upcase(self):
+        """function foo(a: integer; c: real) : array [ 1 .. 20 ] of integer;
         var m, n : real;
-        begin 
+        begin
+
         end"""
-        input = """function foo(a: integer; c: real) : array [ 1 .. 2 ] of integer;
+        input = """function foo(a: integer; c: real) : array [ 1 .. 20 ] of integer;
         var m, n : real;
-        begin 
+        p : integer;
+        begin
+
         end"""
         expect = "successful"
-        self.assertTrue(TestParser.test(input,expect,201))
+        self.assertTrue(TestParser.test(input, expect, 201))
 
-    def test_function_dec_2(self):
-        """FUNcTioN foo(a, b: integer ; g: real):array [5 .. 7] of integer;
+    def test_function_DECLARE_upcase(self):
+        """FUNCTION foo(a,b: integer; g: real; j:array [1 .. 5] of real):array [5 .. 7] of integer;
                   var x,y,z,k: real ;
+
                   BEGIN
 
                   END"""
-        input = """FUNcTioN foo(a, b: integer ; g: real):array [5 .. 7] of integer;
+        input = """FUNCTION foo(a,b: integer; g: real; j:array [1 .. 5] of real):array [5 .. 7] of integer;
                   var x,y,z,k: real ;
+
                   BEGIN
 
                   END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,202))
-    def test_statement_assign_1(self):
+        self.assertTrue(TestParser.test(input, expect, 202))
+
+    def test_statement_ASSIGN_single(self):
         """proCeduRE foo(m, n: integer; c: real) ;
                   var x,y,z: real ;
                   BEGIN
@@ -37,285 +44,324 @@ class ParserSuite(unittest.TestCase):
         input = """proCeduRE foo(m, n: integer; c: real) ;
                   var x,y,z: real ;
                   BEGIN
-                    m := 12; n := c[2];
+                    m := 12;
+                    n := c[2];
+                    z := n;
+                    m := z;
                   END"""
         expect = "successful"
-        self.assertTrue(TestParser.test(input,expect,203))
+        self.assertTrue(TestParser.test(input, expect, 203))
 
-    def test_statement_assign_2(self):
-        """function foo(c: real): real ; y:=a[0]"""
-        input = """function foo(c: real): real ; y:=a[0]"""
-        expect = ""
+    def test_statement_wrong_FUNCTION(self):
+        """function foo_ASSIGN_with_index_express(c: real): real ; y:=a[0]"""
+        input = """function foo_ASSIGN_with_index_express(c: real): real ; y:=a[0]"""
+        expect = "Error on line 1 col 56: y"
 
-        self.assertTrue(TestParser.test(input,expect,204))
-    def test_statement_assign_3(self):
-        """PROCeduRe foo() ;
+        self.assertTrue(TestParser.test(input, expect, 204))
+
+    def test_statement_ASSIGN_with_FUNCCALL(self):
+        """PROCeduRe ASSIGN_with_FUNCCALL() ;
                   var x,y,z: real ;
                   BEGIN
                     a := "char";  b := func(1,a+1) ;
                   END"""
-        input = """PROCeduRe foo() ;
+        input = """PROCeduRe ASSIGN_with_FUNCCALL() ;
                   var x,y,z: real ;
                   BEGIN
                     a := "char";  b := func(1,a+1) ;
                   END"""
         expect = "successful"
-        self.assertTrue(TestParser.test(input,expect,205))
-    def test_statement_assign_4(self):
-        """proCEDURE foo(c: real) ;
-                   var x,y,z: real ;
+        self.assertTrue(TestParser.test(input, expect, 205))
+
+    def test_statement_ASSIGN_with_wrong_LHS(self):
+        """proCEDURE ASSIGN_with_wrong_LHS(c: real) ;
+                   var y,z: real ;
                    BEGIN
                     2 := 1;
                     c := a[0] ;
                    END"""
-        input = """proCEDURE foo(c: real) ;
-                   var x,y,z: real ;
+        input = """proCEDURE ASSIGN_with_wrong_LHS(c: real) ;
+                   var y,z: real ;
                    BEGIN
                     2 := 1;
                     c := a[0] ;
                    END"""
-        expect = ""
-        
+        expect = "Error on line 4 col 20: 2"
 
-        self.assertTrue(TestParser.test(input,expect,206))
-    def test_statement_assign_5(self):
-        """function foo(c: real): real ;
+        self.assertTrue(TestParser.test(input, expect, 206))
+
+    def test_statement_ASSIGN_with_LOWER_BOUND_is_express(self):
+        """function ASSIGN_with_more_index_express(c: real): real ;
                    var x,y: array[m..n] of real;
                    BEGIN
-                    a[m+n] := a[n+1] ;
+                    a[m+n] := a[n+1] := 1 ;
                    END"""
-        input = """function foo(c: real): real ;
+        input = """function ASSIGN_with_more_index_express(c: real): real ;
                    var x,y: array[m..n] of real;
                    BEGIN
-                    a[m+n] := a[n+1] ;
+                    a[m+n] := a[n+1] := 1 ;
                    END"""
-        expect = "successful"
-        self.assertTrue(TestParser.test(input,expect,207))
-    def test_statement_assign_6(self):
-        """FUNCTION foo(c: integer): integer ;
-                   var x,y: integer;
-                   BEGIN
-                    a[m+n] := a[m+1] := foo()[m*2] := a[2 div a] := (a>=m) and then (b<=n);
-                   END"""
-        input = """FUNCTION foo(c: integer): integer ;
-                   var x,y: integer;
-                   BEGIN
-                    a[m+n] := a[m+1] := foo()[m*2] := a[2 div a] := (a>=m) and then (b<=n);
-                   END"""
-        expect = "successful"
-        self.assertTrue(TestParser.test(input,expect,208))
-    def test_statement_assign_7(self):
-        """function foo(c: real): real ; x:=a[1]"""
-        input = """function foo(c: real): real ; x:=a[1]"""
-        expect = "Error on line 1 col 30: x"
+        expect = "Error on line 2 col 34: m"
+        self.assertTrue(TestParser.test(input, expect, 207))
 
-        self.assertTrue(TestParser.test(input,expect,209))
-    def test_statement_if_2(self):
-        """function foo(c: integer): real ;
+    def test_statement_ASSIGN_with_index_express_of_FUNCCALL(self):
+        """FUNCTION ASSIGN_with_index_express_of_FUNCCALL(c: integer): integer ;
+                   var x,y: integer;
+                   BEGIN
+                    a[m+n] := a[m+1] := foo()[m*2] := a[2 div a] := (a>=m)
+                    and then (b<=n);
+                   END"""
+        input = """FUNCTION ASSIGN_with_index_express_of_FUNCCALL(c: integer): integer ;
+                   var x,y: integer;
+                   BEGIN
+                    a[m+n] := a[m+1] := foo()[m*2] := a[2 div a] := (a>=m)
+                    and then (b<=n);
+                   END"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input, expect, 208))
+
+    def test_statement_ASSIGN_with_missing_COBOUND(self):
+        """function ASSIGN_with_missing_COBOUND(c: real): real ; x:=a[1]"""
+        input = """function ASSIGN_with_missing_COBOUND(c: real): real ; x:=a[1]"""
+        expect = "Error on line 1 col 54: x"
+
+        self.assertTrue(TestParser.test(input, expect, 209))
+
+    def test_statement_with_IF_statement(self):
+        """function IF_statement(c: integer): real ;
                    var y,z:real ;
                    BEGIN
                     if(a>=1) then a:=1 ;
+                    if a=1 then return;
                    END"""
-        input = """function foo(c: integer): real ;
+        input = """function IF_statement(c: integer): real ;
                    var y,z:real ;
                    BEGIN
                     if(a>=1) then a:=1 ;
+                    if a=1 then return;
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,210))
-    def test_statement_if_3(self):
-        """pROCEDURE foo(c: integer) ;
+        self.assertTrue(TestParser.test(input, expect, 210))
+
+    def test_statement_with_IF_ELSE_nested(self):
+        """pROCEDURE IF_ELSE_nested(c: integer) ;
                    var y:real ;
                    BEGIN
                     if(a>=1) then a:=1 ;
-                    else if (1<=2)<>(2<=3) 
+                    else if (1<=2)<>(2<=3)
                         then x:=2 ;
                     else foo(a+1,1);
                    END"""
-        input = """pROCEDURE foo(c: integer) ;
+        input = """pROCEDURE IF_ELSE_nested(c: integer) ;
                    var y:real ;
                    BEGIN
                     if(a>=1) then a:=1 ;
-                    else if (1<=2)<>(2<=3) 
+                    else if (1<=2)<>(2<=3)
                         then x:=2 ;
                     else foo(a+1,1);
                    END"""
         expect = "successful"
-        self.assertTrue(TestParser.test(input,expect,211))
-    def test_statement_if_4(self):
-        """pROCEDURE foo(c: real) ;
+        self.assertTrue(TestParser.test(input, expect, 211))
+
+    def test_statement_with_more_IF(self):
+        """pROCEDURE more_IF(c: real) ;
                    var x:real ;
+
                    BEGIN
                     if(a>=1) then a:=2 ;
                     if (1<=2) then beGIN x:=2 ; eND
                     else foo(a+1,2);
+                    if (1) then return;
                    END"""
-        input = """pROCEDURE foo(c: real) ;
+        input = """pROCEDURE more_IF(c: real) ;
                    var x:real ;
+
                    BEGIN
                     if(a>=1) then a:=2 ;
                     if (1<=2) then beGIN x:=2 ; eND
                     else foo(a+1,2);
+                    if (1) then return;
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,212))
-    def test_statement_if_5(self):
-        """pROCEDURE foo(c: real) ;
-                   var x:real ;
+        self.assertTrue(TestParser.test(input, expect, 212))
+
+    def test_statement_IF_with_COBOUND(self):
+        """pROCEDURE IF_with_COBOUND(c: real) ;
+                   var x:real ; z: integer;
+
                    BEGIN
                     if(a>=1) then a:=0 ;
-                    if (1<=2) then beGIN x:=1 ; enD
-                    else foo(a+1,a);
+                    if (1<=2) then beGIN x:=1 ;
+                        enD
+                    else IF_with_COBOUND(a+1,a);
                    END"""
-        input = """pROCEDURE foo(c: real) ;
-                   var x:real ;
+        input = """pROCEDURE IF_with_COBOUND(c: real) ;
+                   var x:real ; z: integer;
+
                    BEGIN
                     if(a>=1) then a:=0 ;
-                    if (1<=2) then beGIN x:=1 ; enD
-                    else foo(a+1,a);
+                    if (1<=2) then beGIN x:=1 ;
+                        enD
+                    else IF_with_COBOUND(a+1,a);
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,213))
-    def test_statement_if_6(self):
-        """pROCEDURE foo1(c: string) ;
-                   var x:real ;
+        self.assertTrue(TestParser.test(input, expect, 213))
+
+    def test_statement__nested_IF_with_COBOUND(self):
+        """pROCEDURE nested_IF_with_COBOUND(c: string) ;
+                   var x:real ; z: integer;
+
                    BEGIN
                     if(a>=1) then beGin
                         a:=1 ;
-                        if(2=1) then a:= b[1];
+                        if(2=1) then
+                        a:= b[1];
                         else b:=a[1]:= 1;
                     ENd
                     END"""
-        input = """pROCEDURE foo1(c: string) ;
-                   var x:real ;
+        input = """pROCEDURE nested_IF_with_COBOUND(c: string) ;
+                   var x:real ; z: integer;
+
                    BEGIN
                     if(a>=1) then beGin
                         a:=1 ;
-                        if(2=1) then a:= b[1];
+                        if(2=1) then
+                        a:= b[1];
                         else b:=a[1]:= 1;
                     ENd
                     END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,214))
-    def test_statement_with_1(self):
-        """pROCEDURE foo(c: real) ;
+        self.assertTrue(TestParser.test(input, expect, 214))
+
+    def test_statement_WITH(self):
+        """pROCEDURE WITHstm(c: real) ;
                    BEGIN
                     with a , b : integer ; c : array [2 .. 4] of real ; dO
                     d := c[a] + b ;
                    END"""
-        input = """pROCEDURE foo(c: real) ;
+        input = """pROCEDURE WITHstm(c: real) ;
                    BEGIN
                     with a , b : integer ; c : array [2 .. 4] of real ; dO
                     d := c[a] + b ;
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,215))
-    def test_statement_with_2(self):
-        """pROCEDURE foo(c: real) ;
+        self.assertTrue(TestParser.test(input, expect, 215))
+
+    def test_statement_WITH_with_COBOUND(self):
+        """pROCEDURE WITH_with_COBOUND(c: real) ;
                    BEGIN
                     with a , b : integer ; c : array [1 .. 2] of real ; do begin
                     a := c[a] + b ;
-                    foo();foo1(a,b,c);
+                    foo();WITH_with_COBOUND(a,b,c);
+
                     end
                    END"""
-        input = """pROCEDURE foo(c: real) ;
+        input = """pROCEDURE WITH_with_COBOUND(c: real) ;
                    BEGIN
                     with a , b : integer ; c : array [1 .. 2] of real ; do begin
                     a := c[a] + b ;
-                    foo();foo1(a,b,c);
+                    foo();WITH_with_COBOUND(a,b,c);
+
                     end
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,216))
-    def test_statement_with_3(self):
-        """pROCEDURE foo(c: real) ;
+        self.assertTrue(TestParser.test(input, expect, 216))
+
+    def test_statement_WITH_with_CALL_statement(self):
+        """pROCEDURE WITH_with_CALL_statement(c: real) ;
                    BEGIN
                     with a ,b : integer ; c: array [1 .. 2] of real ; do
                     begin
                     d := c [a] + b ;
-                    foo();foo1(a,b,c);
-                    with a , b : integer ; do 
+                    foo();WITH_with_CALL_statement(a,b,c);
+                    with a , b : integer ; do
                     begin
-                        foo2(a,b,"abc");
+                        WITH_with_CALL_statement(a,b,"abc");
                     end
                     end
                    END"""
-        input = """pROCEDURE foo(c: real) ;
+        input = """pROCEDURE WITH_with_CALL_statement(c: real) ;
                    BEGIN
                     with a ,b : integer ; c: array [1 .. 2] of real ; do
                     begin
                     d := c [a] + b ;
-                    foo();foo1(a,b,c);
-                    with a , b : integer ; do 
+                    foo();WITH_with_CALL_statement(a,b,c);
+                    with a , b : integer ; do
                     begin
-                        foo2(a,b,"abc");
+                        WITH_with_CALL_statement(a,b,"abc");
                     end
                     end
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,217))
-    def test_statement_with_4(self):
-        """function foo(d: real): sTRIng;
+        self.assertTrue(TestParser.test(input, expect, 217))
+
+    def test_statement_nested_WITH(self):
+        """function nested_WITH(d: real): sTRIng;
                    BEGIN
                     with c , d : integer ; c : array [1 .. 2] of real ; do
-                    with a , b : integer ; 
+                    with a , b : integer ;
                     do
-                        foo2(a,b,"anc");
+                        nested_WITH(a,b,"anc");
                    END"""
-        input = """function foo(d: real): sTRIng;
+        input = """function nested_WITH(d: real): sTRIng;
                    BEGIN
                     with c , d : integer ; c : array [1 .. 2] of real ; do
-                    with a , b : integer ; 
+                    with a , b : integer ;
                     do
-                        foo2(a,b,"anc");
+                        nested_WITH(a,b,"anc");
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,218))
-    def test_statement_for_7(self):
-        """function foo(c: real): STRIng;
+        self.assertTrue(TestParser.test(input, expect, 218))
+
+    def test_statement_FOR(self):
+        """function statement_FOR(c: real): STRIng;
                    BEGIN
-                    FOR i:=1 to m+10 
-                    do 
+                    FOR i:=1 to m+10
+                    do
                         s := s + 1;
+                        m := s;
                    END"""
-        input = """function foo(c: real): STRIng;
+        input = """function statement_FOR(c: real): STRIng;
                    BEGIN
-                    FOR i:=1 to m+10 
-                    do 
+                    FOR i:=1 to m+10
+                    do
                         s := s + 1;
+                        m := s;
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,219))
-    def test_statement_with_6(self):
+        self.assertTrue(TestParser.test(input, expect, 219))
+
+    def test_statement_WITH_and_FOR(self):
         """function foo(c: real): STRIng;
                    BEGIN
                     with i, j: integer; tmp: real; do
                     print(i, j, tmp);
-                    FOR i:=1 to m+10 
-                    do 
+                    FOR i:=1 to m+10
+                    do
                         s := s + 1;
                    END"""
         input = """function foo(c: real): STRIng;
                    BEGIN
                     with i, j: integer; tmp: real; do
                     print(i, j, tmp);
-                    FOR i:=1 to m+10 
-                    do 
+                    FOR i:=1 to m+10
+                    do
                         s := s + 1;
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,220))
-    def test_statement_while_1(self):
+        self.assertTrue(TestParser.test(input, expect, 220))
+
+    def test_statement_WHILE_single(self):
         """PROCEDURE foo(c: integer) ;
                    var x:real ;
                    BEGIN
@@ -328,8 +374,9 @@ class ParserSuite(unittest.TestCase):
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,221))
-    def test_statement_while_2(self):
+        self.assertTrue(TestParser.test(input, expect, 221))
+
+    def test_statement_WHILE_and_IF(self):
         """pROCEDURE foo(c: real) ;
                    var x:real ;
                    BEGIN
@@ -348,8 +395,9 @@ class ParserSuite(unittest.TestCase):
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,222))
-    def test_statement_while_3(self):
+        self.assertTrue(TestParser.test(input, expect, 222))
+
+    def test_statement_nested_WHILE(self):
         """pROCEDURE foo(c: real) ;
                    var x:real ;
                    BEGIN
@@ -366,13 +414,14 @@ class ParserSuite(unittest.TestCase):
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,223))
-    def test_statement_while_4(self):
+        self.assertTrue(TestParser.test(input, expect, 223))
+
+    def test_statement_NESTED_WHILE_and_IF(self):
         """pROCEDURE foo(d: real) ;
                    BEGIN
                     whILe(a<>1) do bEGin
                         while(1) do x:=1;
-                        if(a=1) then 
+                        if(a=1) then
                         begin end
                     end
                    END"""
@@ -380,19 +429,20 @@ class ParserSuite(unittest.TestCase):
                    BEGIN
                     whILe(a<>1) do bEGin
                         while(1) do x:=1;
-                        if(a=1) then 
+                        if(a=1) then
                         begin end
                     end
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,224))
-    def test_statement_while_5(self):
+        self.assertTrue(TestParser.test(input, expect, 224))
+
+    def test_statement_nested_WHILE_and_IF_and_COBOUND(self):
         """pROCEDURE foo(d: real) ;
                    BEGIN
                     whILe(1) do bEGin
                         while(1) do x:=1;
-                        if(a=1) then 
+                        if(a=1) then
                         begin end
                     end
                    END"""
@@ -400,14 +450,15 @@ class ParserSuite(unittest.TestCase):
                    BEGIN
                     whILe(1) do bEGin
                         while(1) do x:=1;
-                        if(a=1) then 
+                        if(a=1) then
                         begin end
                     end
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,225))
-    def test_statement_while_6(self):
+        self.assertTrue(TestParser.test(input, expect, 225))
+
+    def test_statement_nested_WHILE_and_ASSIGN(self):
         """pROCEDURE foo(c: real) ;
                    var x:real ;
                    BEGIN
@@ -426,28 +477,31 @@ class ParserSuite(unittest.TestCase):
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,226))
-    def test_statement_for_1(self):
+        self.assertTrue(TestParser.test(input, expect, 226))
+
+    def test_statement_FOR_2(self):
         """function foo(s: real): STRIng;
                    BEGIN
-                    FOR i:=1 to m+10 
-                    do 
-                        s := s + 1;
+                    FOR j:=0 to m+10
+                    do begin
+                        s := s + 1; end
                    END"""
         input = """function foo(s: real): STRIng;
                    BEGIN
-                    FOR i:=1 to m+10 
-                    do 
+                    FOR i:=1 to m+10
+                    do
                         s := s + 1;
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,227))
-    def test_statement_for_2(self):
+        self.assertTrue(TestParser.test(input, expect, 227))
+
+    def test_statement_FOR_with_IF(self):
         """function foo(c: real): sTRIng;
                    BEGIN
                     FOR i:=1 to m+10 do beGin
                         s := s + 1;
+                        c := i;
                         if(a=1) then begin s:=s-1; end
                     end
                    END"""
@@ -460,13 +514,15 @@ class ParserSuite(unittest.TestCase):
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,228))
-    def test_statement_for_3(self):
+        self.assertTrue(TestParser.test(input, expect, 228))
+
+    def test_statement_nested_FOR(self):
         """function foo(d: real): STRIng;
                    BEGIN
                     FOR i:=1 to m+10 do beGin
                         for j:=m+1 doWnTO 100 do bEGin
                             s := s + 3;
+                            d := s := i;
                             if(a=1) then s:=s-1;
                         eND
                     end
@@ -476,42 +532,57 @@ class ParserSuite(unittest.TestCase):
                     FOR i:=1 to m+10 do beGin
                         for j:=m+1 doWnTO 100 do bEGin
                             s := s + 3;
+                            d := s := i;
                             if(a=1) then s:=s-1;
                         eND
                     end
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,229))
-    def test_statement_for_4(self):
-        
+        self.assertTrue(TestParser.test(input, expect, 229))
+
+    def test_statement_nested_FOR_WHILE_FOR(self):
+        """PROCEDURE foo(c: real);
+                   BEGIN
+                    FOR i:=1 to m+10 do beGin
+                        while i>1 do
+                            FOR i:=m+1 doWnTO 10 do
+                                while j>1 do x:=foo(10);
+                                print(j);
+                    End
+                   END"""
         input = """PROCEDURE foo(c: real);
                    BEGIN
                     FOR i:=1 to m+10 do beGin
                         while i>1 do
                             FOR i:=m+1 doWnTO 10 do
                                 while j>1 do x:=foo(10);
+                                print(j);
                     End
                    END"""
         expect = "successful"
-        self.assertTrue(TestParser.test(input,expect,230))
-    def test_statement_break_1(self):
+        self.assertTrue(TestParser.test(input, expect, 230))
+
+    def test_statement_with_BREAK(self):
         """pROCEDURE foo(c: real);
                    BEGIN
                     FOR i:=1 to m+10 do beGin
+                        print(i);
                         brEaK;
                     end
                    END"""
         input = """pROCEDURE foo(c: real);
                    BEGIN
                     FOR i:=1 to m+10 do beGin
+                        print(i);
                         brEaK;
                     end
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,231))
-    def test_statement_break_2(self):
+        self.assertTrue(TestParser.test(input, expect, 231))
+
+    def test_statement_BREAK2(self):
         """pROCEDURE foo(c: real);
                    BEGIN
                     FOR i:=1 to m+10 do beGin
@@ -528,8 +599,9 @@ class ParserSuite(unittest.TestCase):
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,232))
-    def test_statement_continue_1(self):
+        self.assertTrue(TestParser.test(input, expect, 232))
+
+    def test_statement_CONTINUE(self):
         """PROCEDURE foo(c: real);
                    BEGIN
                     while (1) do ContinuE ;
@@ -540,8 +612,9 @@ class ParserSuite(unittest.TestCase):
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,233))
-    def test_statement_return_1(self):
+        self.assertTrue(TestParser.test(input, expect, 233))
+
+    def test_statement_RETURN(self):
         """pROCEDURE foo(c: real);
                    BEGIN
                     while (1) do RETURN ;
@@ -552,32 +625,35 @@ class ParserSuite(unittest.TestCase):
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,234))
-    def test_statement_call_1(self):
-        """function foo(c: real): real;
+        self.assertTrue(TestParser.test(input, expect, 234))
+
+    def test_statement_CALL(self):
+        """function statement_CALL(c: real): real;
                    BEGIN
-                    foocall(3,a+1,a<>1,a[1]);
+                    statement_CALL(3,a+1,a<>1,a[1]);
                     return 1;
                    END"""
-        input = """function foo(c: real): real;
+        input = """function statement_CALL(c: real): real;
                    BEGIN
-                    foocall(3,a+1,a<>1,a[1]);
+                    statement_CALL(3,a+1,a<>1,a[1]);
                     return 1;
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,235))
-    def test_statement_call_2(self):
-        
+        self.assertTrue(TestParser.test(input, expect, 235))
+
+    def test_statement_nested_CALL(self):
+
         input = """function foo(c: real): integer;
                    BEGIN
-                    foo(3,foo(foo1(foo(2,a+1))));
+                    y := foo(3,foo(foo1(foo(2,a+1))));
                     return func(a(1,2));
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,236))
-    def test_statement_call_3(self):
+        self.assertTrue(TestParser.test(input, expect, 236))
+
+    def test_statement_nested_WITH_CALL(self):
         """function foo(c: real): integer;
                    BEGIN
                     foo (3,a+1);
@@ -592,76 +668,82 @@ class ParserSuite(unittest.TestCase):
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,237))
-    def test_statement_call_4(self):
+        self.assertTrue(TestParser.test(input, expect, 237))
+
+    def test_statement_CALL_with_COMMENT(self):
         """function foo(c: real): integer;
                    BEGIN
-                    text(brown); { colour}
-                	ClrScr(); {.d.}
+                    text(insert); { colour}
+                	{.comment here.}
                     return func(a(1,2));
                    END"""
         input = """function foo(c: real): integer;
                    BEGIN
-                    text(brown); { colour}
-                	ClrScr(); {.d.}
+                    text(insert); { colour}
+                	{.comment here.}
                     return func(a(1,2));
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,238))
-    def test_statement_call_5(self):
+        self.assertTrue(TestParser.test(input, expect, 238))
+
+    def test_statement_CALL_with_more_parameter(self):
         """function foo(c: real): integer;
                    BEGIN
-                    foo(3,a+1,x and then y,a[1],foo(1,2)[m+1]);
-                    return foo2() + foo();
+                    foo(3,a+1,x and then y, c,a[1],foo(1,2)[m+1]);
+                    return foo2() + foo() + 1;
                    END"""
         input = """function foo(c: real): integer;
                    BEGIN
-                    foo(3,a+1,x and then y,a[1],foo(1,2)[m+1]);
-                    return foo2() + foo();
+                    foo(3,a+1,x and then y, c,a[1],foo(1,2)[m+1]);
+                    return foo2() + foo() + 1;
                    END"""
         expect = "successful"
 
-        self.assertTrue(TestParser.test(input,expect,239))
-    def test_statement_mix_1(self):
+        self.assertTrue(TestParser.test(input, expect, 239))
+
+    def test_statement_MIX_ASSIGMENT(self):
         """
-                procedure test1() ;
-                begin
-	               if a=b then
-	               bEGin
-		                 b := c := 6;
-		                 if(e <> f) then foo(a,c) ;
-	               end
-                end
-                """
+        procedure test1() ;
+        begin
+            if a=b then
+            bEGin
+                    b := c := 6;
+                    if(e <> f) then foo(a,c) else a := b := c ;
+            end
+        end
+        """
         input = """
                 procedure test1() ;
                 begin
 	               if a=b then
 	               bEGin
 		                 b := c := 6;
-		                 if(e <> f) then foo(a,c) ;
+		                 if(e <> f) then foo(a,c); else a := b := c ;
 	               end
                 end
                 """
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,240))
-    def test_statement_mix_2(self):
+
+    def test_statement_mix_IF_WHILE(self):
         """
-                procedure test2() ;
+                procedure test_mix_if_while() ;
                 begin
 	               if a=b then if c=d then while (d=e) do
                    beGin
+                        if (1) then print("OK");
                    eND
                else c := 1;
                 end
                 """
         input = """
-                procedure test2() ;
+                procedure test_mix_if_while() ;
                 begin
 	               if a=b then if c=d then while (d=e) do
                    beGin
+                        if (1) then print("OK");
                    eND
                else c := 1;
                 end
@@ -669,76 +751,74 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,241))
-    def test_statement_mix_3(self):
+    def test_statement_mix_VAR_FUNCTION_PROCEDURE(self):
         """
                 VAR i: real ;
-                FUNCTION f(): integer ;
+                FUNCTION funcmix(): integer ;
                 begin
 	               return 100;
                 end
-                procedure main() ;
+                procedure procmix() ;
                 var
-	               main: integer ;
+	               m: integer ;
                 begin
-	               main := f() ;
-	               putIntLn(main);
-	               main := f := i:= 100;
-                   with
-                        i: integer;
-	               do begin 
-		                putIntLn (i);
-	               end
-	               putIntLn (main);
+	               m := f() ;  
+                   put(m);
+	               put(main);
                 end
                 var g: real ;
                 """
         input = """
                 VAR i: real ;
-                FUNCTION f(): integer ;
+                FUNCTION funcmix(): integer ;
                 begin
 	               return 100;
                 end
-                procedure main() ;
+                procedure procmix() ;
                 var
-	               main: integer ;
+	               m: integer ;
                 begin
-	               main := f() ;
-	               putIntLn(main);
-	               main := f := i:= 100;
-                   with
-                        i: integer;
-	               do begin 
-		                putIntLn (i);
-	               end
-	               putIntLn (main);
+	               m := f() ;  
+                   put(m);
+	               put(main);
                 end
                 var g: real ;
                 """
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,242))
-    def test_statement_mix_4(self):
-        
+
+    def test_statement_PROCEDURE(self):
+        """
+                proceDure Hello(b:integer);
+                begin
+                    a := b := b + c;
+                end
+                """
         input = """
                 proceDure Hello(b:integer);
                 begin
-                    a := b + c;
+                    a := b := b + c;
                 end
                 """
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,243))
-    def test_statement_mix_5(self):
+    def test_statement_FUNCTION(self):
         """
         var x, y: real;
+
         function add(x, y: real): real;
+        
         begin
             return x + y + random();
         end
         """
         input = """
         var x, y: real;
+
         function add(x, y: real): real;
+        
         begin
             return x + y + random();
         end
@@ -746,25 +826,33 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,244))
-    def test_statement_mix_6(self):
+    def test_statement_WRONG_OPERATOR(self):
         """
+        function add(x, y: real): real;
+        
+        begin
         if a < b then
         begin 
             a := 1;
             b = foo(a); 
+        end
         end
         """
         input = """
+        function add(x, y: real): real;
+        
+        begin
         if a < b then
         begin 
             a := 1;
             b = foo(a); 
         end
+        end
         """
-        expect = ""
+        expect = "Error on line 8 col 14: ="
 
         self.assertTrue(TestParser.test(input,expect,245))
-    def test_statement_mix_7(self):
+    def test_statement_ASSIGN_with_nested_index_express(self):
         """
                 procedure mainfoo() ;
                 beGin
@@ -784,7 +872,7 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,246))
-    def test_statement_mix_8(self):
+    def test_statement_mix_more_ELSE(self):
         """
                 PROCEDURE main() ;
                 beGin
@@ -806,7 +894,7 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,247))
-    def test_statement_mix_9(self):
+    def test_statement_mix_complex_FOR_statement(self):
         """
                 procedure swap() ;
                 var a: array[0 .. m-1] of integer;
@@ -816,25 +904,25 @@ class ParserSuite(unittest.TestCase):
                         for j:= i+1 to n-1 do
                             if(a[i]>a[j]) then
                             beGin
-                                temp := a[i];
-                                a[i] := a[j];
-                                a[j] := temp;
+                            temp := a[i];
+                            a[i] := a[j];
+                            a[j] := temp;
                             eND
                     print(a);
                 eND
                 """
         input = """
                 procedure swap() ;
-                var a: array[0 .. m-1] of integer;
+                var a: array[0 .. 1] of integer;
                  i,j,temp: integer;
                 beGin
                     for i := 0 to n do
                         for j:= i+1 to n-1 do
                             if(a[i]>a[j]) then
                             beGin
-                                temp := a[i];
-                                a[i] := a[j];
-                                a[j] := temp;
+                            temp := a[i];
+                            a[i] := a[j];
+                            a[j] := temp;
                             eND
                     print(a);
                 eND
@@ -842,7 +930,7 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,248))
-    def test_statement_mix_10(self):
+    def test_statement_mix_IF_with_COMMENT(self):
         """
         procedure swap() ;
         var a: array[0 .. m-1] of integer;
@@ -855,18 +943,23 @@ class ParserSuite(unittest.TestCase):
         eND
         """
         input = """
+        procedure swap() ;
+        var a: array[0 .. m-1] of integer;
+            i,j,temp: integer;
+        beGin
         { 
             if then else
         }
         function("hello");
+        eND
         """
-        expect = "successful"
+        expect = "Error on line 3 col 26: m"
 
         self.assertTrue(TestParser.test(input,expect,249))
-    def test_statement_mix_11(self):
+    def test_statement_WRONG_EXPRESSION_of_IF(self):
         """
         procedure swap() ;
-        var a: array[0 .. m-1] of integer;
+        var a: array[0 .. 1] of integer;
             i,j,temp: integer;
         beGin
         if (x:=1) = 2 then
@@ -877,7 +970,7 @@ class ParserSuite(unittest.TestCase):
         """
         input = """
         procedure swap() ;
-        var a: array[0 .. m-1] of integer;
+        var a: array[0 .. 1] of integer;
             i,j,temp: integer;
         beGin
         if (x:=1) = 2 then
@@ -886,21 +979,22 @@ class ParserSuite(unittest.TestCase):
             exit(0);
         END
         """
-        expect = ""
+        expect = "Error on line 6 col 13: :="
 
         self.assertTrue(TestParser.test(input,expect,250))
-    def test_statement_mix_12(self):
+
+    def test_statement_RETURN_EXPRESSION(self):
         """
-                Function CountX(A:array[0 .. 100] of integer; N,X : Integer) : Integer;
-                Var i , Count : Integer;
-                Begin
-                 Count := 0;
-                 For i:=1 to N do
-                  If ( A[i] = X ) then
-                   Count := Count + 1;
-                 return Count;
-                End
-                """
+        Function CountX(A:array[0 .. 100] of integer; N,X : Integer) : Integer;
+        Var i , Count : Integer;
+        Begin
+            Count := 0;
+            For i:=1 to N do
+            If ( A[i] = X ) then
+            Count := Count + 1;
+            return Count;
+        End
+        """
         input = """
                 Function CountX(A:array[0 .. 100] of integer; N,X : Integer) : Integer;
                 Var i , Count : Integer;
@@ -915,17 +1009,18 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,251))
-    def test_statement_mix_13(self):
+
+    def test_statement_index_expression_in_IF(self):
         """
-                PROCEDURE replace (A:array[0 .. 100] of integer;N, x,y:Integer);
-                Var i:Integer;
-                Begin
-                For i:=0 to N do
-                If(A[i] = y) then { x ==> y }
-                A[i] := x;
-                return;
-                End
-                """
+        PROCEDURE replace (A:array[0 .. 100] of integer;N, x,y:Integer);
+        Var i:Integer;
+        Begin
+        For i:=0 to N do
+        If(A[i] = y) then { x ==> y }
+        A[i] := x;
+        return;
+        End
+        """
         input = """
                 Procedure replace (A:array[0 .. 100] of integer;N, x,y:Integer);
                 Var i:Integer;
@@ -939,17 +1034,18 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,252))
-    def test_statement_mix_14(self):
+
+    def test_statement_mix_FUNCCALL_as_IF_EXPRESSION(self):
         """
-                function calc(i : integer): boolean;
-                var k : integer;
+            function calc(i : integer): boolean;
+            var k : integer;
+            begin
+            if copy(s,i-2*k+1,k) = copy(s,i-k+1,k) then
                 begin
-                if copy(s,i-2*k+1,k) = copy(s,i-k+1,k) then
-                   begin
-                    exit();
-                   end
+                exit();
                 end
-                """
+            end
+        """
         input = """
                 function calc(i : integer): boolean;
                 var k : integer;
@@ -963,7 +1059,7 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,253))
-    def test_statement_mix_15(self):
+    def test_statement_PROCEDURE_missing_var_declare(self):
         
         input = """
                 Var R,S,P:real;
@@ -979,7 +1075,7 @@ class ParserSuite(unittest.TestCase):
 
         self.assertTrue(TestParser.test(input,expect,254))
     
-    def test_statement_mix_16(self):
+    def test_statement_mix_complicated_EXPRESSION(self):
         input = """
                 Var R,S,P:real;
                 pROCEDURE Scalc() ;
@@ -994,13 +1090,12 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
         self.assertTrue(TestParser.test(input,expect,255))
     
-    def test_statement_mix_17(self):
+    def test_UNCLOSED_COMMENT(self):
         
     
         """ Test ... """
         input ="""
         var a, b, c: real;
-
         var x, y, z: Boolean;
         
 
@@ -1024,10 +1119,10 @@ class ParserSuite(unittest.TestCase):
             (*       
         end
         """
-        expect ="Error on line 28 col 5: *"
+        expect ="Error on line 23 col 13: *"
         self.assertTrue(TestParser.test(input,expect,256))
        
-    def test_statement_mix_18(self):
+    def test_statement_mix_IF_with_VAR_DECLARE(self):
         """ Function Min(N:Integer) :Integer;
                 Var x,y:Integer;
                 Begin
@@ -1041,7 +1136,7 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,257))
-    def test_statement_mix_19(self):
+    def test_statement_mix_nested_IF_with_RETURN_and_nested_index_expression(self):
         """
                 procedure main() ;
                 beGin
@@ -1068,7 +1163,7 @@ class ParserSuite(unittest.TestCase):
         
 
         self.assertTrue(TestParser.test(input,expect,258))
-    def test_statement_mix_20(self):
+    def test_statement_mix_IF_with_nested_COBOUND_and_CALL(self):
         """
                 procedure test() ;
                 begin
@@ -1099,8 +1194,17 @@ class ParserSuite(unittest.TestCase):
         
 
         self.assertTrue(TestParser.test(input,expect,259))
-    def test_statement_mix_21(self):
-        
+    def test_statement_mix_VAR_DECLARE_and_PROCEDURE(self):
+        """
+                Var name: String;
+                Procedure Main();
+                Begin
+	               (*this is line*)
+	               writeln();//this is new line}
+	               writeln(name);
+	               readln();
+                End
+                """
         input = """
                 Var name: String;
                 Procedure Main();
@@ -1116,168 +1220,384 @@ class ParserSuite(unittest.TestCase):
 
         self.assertTrue(TestParser.test(input,expect,260))
 
-    def test_statement_mix_16(self):
+    def test_statement_RETURN_with_EXPRESSION_FUNCCALL(self):
         
-        input = 
+        input = """
+                function gt(x:integer):integer;
+                begin
+                if x = 0 then
+                 return 1;
+                else
+                 return x*gt(x-1);
+                end
+                """
+        expect = "successful" 
         
 
         self.assertTrue(TestParser.test(input,expect,261))
-    def test_statement_mix_16(self):
-        
-        input = 
+    def test_statement_FUNCCALL_as_EXPRESSION(self):
+        """
+                function fibonacy(x: integer): integer;
+                var f1,f2: integer;
+                temp: integer;
+                Begin
+                 if x<=2 then
+                  return 1;
+                 else
+                  temp := fibonacy(x-2)+ fibonacy(x-1);
+                  return temp;
+                end
+                """
+        input = """
+                function fibonacy(x: integer): integer;
+                var f1,f2: integer;
+                temp: integer;
+                Begin
+                 if x<=2 then
+                  return 1;
+                 else
+                  temp := fibonacy(x-2)+ fibonacy(x-1);
+                  return temp;
+                end
+                """
+        expect = "successful"
         
 
         self.assertTrue(TestParser.test(input,expect,262))
-    def test_statement_mix_16(self):
-        
-        input = 
+    def test_statement_FUNCCALL_as_FUNCCALL_parament(self):
+        """function foo(c: real; d: integer): integer;
+                   BEGIN
+                    c := d;
+                    return c;
+                    foo(foo());
+                   END"""
+        input = """function foo(c: real; d: integer): integer;
+                   BEGIN
+                    c := d;
+                    return c;
+                    foo(foo());
+                   END"""
+        expect = "successful" 
         
 
         self.assertTrue(TestParser.test(input,expect,263))
-    def test_statement_mix_16(self):
-        
-        input = 
+    def test_statement_wrong_FUNCCALL(self):
+        """function foo(c: real; d:integer): integer;
+                   BEGIN
+                    c := foo1(c d);
+                    return c;
+                   END"""
+        input = """function foo(c: real; d: foo1(): integer;
+                   BEGIN
+                    c := foo1(c d);
+                    return c;
+                   END"""
+        expect = "Error on line 1 col 25: foo1" 
         
 
         self.assertTrue(TestParser.test(input,expect,264))
     
-    def test_statement_mix_16(self):
-        
-        input = 
+    def test_statement_wrong_FUNCTION_DECLARE(self):
+        """function foo(c: real d: integer: integer;
+                   BEGIN
+                    c := foo1(c, d);
+                    return c;
+                   END"""
+        input = """function foo(c: real d: integer: integer;
+                   BEGIN
+                    c := foo1(c, d);
+                    return c;
+                   END"""
+        expect = "Error on line 1 col 21: d"  
         
 
         self.assertTrue(TestParser.test(input,expect,265))
-    def test_statement_mix_16(self):
-        
-        input = 
+    def test_statement_wrong_IF(self):
+        """function foo(c: real; d: integer): integer;
+                   BEGIN
+                    if () then
+                    c := foo1(c, d);
+                    return c;
+                   END"""
+        input = """function foo(c: real; d: integer): integer;
+                   BEGIN
+                    if () then
+                    c := foo1(c, d);
+                    return c;
+                   END"""
+        expect = "Error on line 3 col 24: )" 
         
 
         self.assertTrue(TestParser.test(input,expect,266))
-    def test_statement_mix_16(self):
+    def test_statement_wrong_WHILE_COLON_redundant(self):
+        input = """function foo(c: real; d: integer): integer;
+                   BEGIN
+                    while (1) do:
+                    c := foo1(c, d);
+                    return c;
+                   END"""
+        expect = "Error on line 3 col 32: :" 
         
-        input = 
         
 
         self.assertTrue(TestParser.test(input,expect,267))
-    def test_statement_mix_16(self):
+    def test_statement_wrong_WITH_missing_SEMI(self):
         
-        input = 
         
+        input = """function foo(c: real; d: integer): integer;
+                   BEGIN
+                    with a , b : integer ; c : array [1 .. 2] of real  do begin
+                    d := c [a] + b ; 
+                    
+                    return c;
+                    end
+                   END"""
+        expect = "Error on line 3 col 71: do" 
 
         self.assertTrue(TestParser.test(input,expect,268))
-    def test_statement_mix_16(self):
+    def test_statement_wrong_COBOUND_missing_END(self):
         
-        input = 
+        input = """function foo(c: real; d: integer): integer;
+                   BEGIN
+                    with a , b : integer ; c : array [1 .. 2] of real;  do begin
+                    d := c [a] + b ; 
+                    
+                    return c;
+                   END"""
+        expect = "Error on line 7 col 22: <EOF>"
         
 
         self.assertTrue(TestParser.test(input,expect,269))
-    def test_statement_mix_16(self):
+    def test_statement_wrong_RETURN_missing_SEMI(self):
         
-        input = 
+        input = """function foo(c: real; d: integer): integer;
+                   BEGIN
+                    with a , b : integer ; c : array [1 .. 2] of real;  do begin
+                    d := c [a] + b ; 
+                    end
+                    return c
+                   END"""
+        expect = "Error on line 7 col 19: END" 
         
 
         self.assertTrue(TestParser.test(input,expect,270))
-    def test_statement_mix_16(self):
+    def test_statement_wrong_CONTINUE_missing_SEMI(self):
         
-        input = 
+        input = """function foo(c: real; d: integer): integer;
+                   BEGIN
+                    with a , b : integer ; c : array [1 .. 2] of real;  do begin
+                    d := c [a] + b ; 
+                    continue
+                    end
+                    return c;
+                    
+                   END"""
+        expect = "Error on line 6 col 20: end"
         
 
         self.assertTrue(TestParser.test(input,expect,271))
-    def test_statement_mix_16(self):
+    def test_wrong_PROGRAM_STRUCTURE(self):
         
-        input = 
-        
+        input = """
+                with a , b : integer ; c : array [1 .. 2] of real;  do begin
+                    d := c [a] + b ; 
+                    continue
+                    end
+                    return c;
+                """
+        expect = "Error on line 2 col 16: with"
 
         self.assertTrue(TestParser.test(input,expect,272))
-    def test_statement_mix_16(self):
+    def test_statement_wrong_ASSIGN_wrong_operator(self):
         
-        input = 
+        input = """function foo(c: real; d: integer): integer;
+                   BEGIN
+                    with a , b : integer ; c : array [1 .. 2] of real;  do begin
+                    d = c [a] + b ; 
+                    continue;
+                    return c;
+                    end
+                   END"""
+        expect = "Error on line 4 col 22: ="
         
 
         self.assertTrue(TestParser.test(input,expect,273))
-    def test_statement_mix_16(self):
+    def test_statement_wrong_FOR_missing_expression(self):
         
-        input = 
+        input = """function foo(c: real; d: integer): integer;
+                   BEGIN
+                    for ()  do begin
+                    d := c [a] + b ; 
+                    continue;
+                    return c; end
+                   END"""
+        expect = "Error on line 3 col 24: ("
         
 
         self.assertTrue(TestParser.test(input,expect,274))
-    def test_statement_mix_16(self):
+    def test_statement_CONTINUE_with_WHILE(self):
         
-        input = 
+        input = """Procedure testContinue(c: real);
+                   BEgin
+                    while (1) do coNtInUe ;
+                   EnD
+                   """
+        expect = "successful"
         
 
         self.assertTrue(TestParser.test(input,expect,275))
-    def test_statement_mix_16(self):
-        
-        input = 
+    def test_statement_CALL_and_RETURN(self):
+        input = """function testCALL(c: real): integer;
+                   BEgin
+                    testCALL(1,a<>1,a[1]);
+                    return 1;
+                   EnD
+                   """
+        expect = "successful"
         
 
         self.assertTrue(TestParser.test(input,expect,276))
-    def test_statement_mix_16(self):
+    def test_statement_with_triple_COBOUND(self):
         
-        input = 
+        input = """
+                Procedure test1() ;
+                BEgin
+	               if a=b then
+	               BEgin
+		                 b := c ;
+		                 if(e <> f) then begin test1(a,c) ; end
+	               EnD
+                EnD
+                """
+        expect = "successful"
         
 
         self.assertTrue(TestParser.test(input,expect,277))
-    def test_statement_mix_16(self):
+    def test_statement_wrong_ASSIGN_missing_operand(self):
         
-        input = 
+        input = """
+                function sum_real_array(a: array[0 .. 10] of real;n:integer):real;
+                var i:integer;s:real;
+                BEgin
+                    a:=:=4;
+                     Writeln("Sum of real array: "+sum_real_array(a,n));
+                EnD
+                """
+        expect = "Error on line 5 col 23: :="
         
 
         self.assertTrue(TestParser.test(input,expect,278))
-    def test_statement_mix_16(self):
+    def test_statement_MULTI_RETURN(self):
         
-        input = 
+        input = """
+                function power(x:integer):integer;
+                BEgin
+                if x = 0 then
+                 return 1;
+                else
+                 return x*power(x-1);
+                EnD
+                """
+        expect = "successful"
         
 
         self.assertTrue(TestParser.test(input,expect,279))
-    def test_statement_mix_16(self):
+    def test_statement_more_statement(self):
         
-        input = 
+        input = """
+                Function test_more_stmt(m,n:integer):integer;
+               
+                 var a: real;
+                  BEgin
+                    begin
+                        for i := 1 to 10 do 
+                        a := a +1;
+                        break;                    
+					end
+                EnD
+                """
+        expect = "successful"
         
 
         self.assertTrue(TestParser.test(input,expect,280))
-    def test_statement_mix_16(self):
+    def test_statement_VAR_DECLARE(self):
         
-        input = 
-        
-
+        input = input = """
+                var i: boolean;
+                """
+        expect = "successful"
         self.assertTrue(TestParser.test(input,expect,281))
-    def test_statement_mix_16(self):
-        
-        
-        
+    def test_statement_mix_FOR_IF_RETURN(self):
+        input = """
+                Function testing(): Boolean;
+                Var Flag:Boolean;
+                    i :Integer;
+                BEgin
+                 Flag:=True;
+                 For  i :=1 to N do
+                 If(A[i] <> A[N-i  +1]) Then
+                 Flag :=False;     
+                 return flag;
+                EnD
+                """
+        expect = "successful"
 
         self.assertTrue(TestParser.test(input,expect,282))
-    def test_statement_mix_16(self):
+    def test_statement_nested_scope(self):
+        input = """
+                Function nested_scope(  N :Integer) : Boolean;
+                Var Flag : Boolean;
+                 i :Integer;
+                BEgin
+                 begin
+                 EnD
+                 return Flag;
+                EnD
+                """
+        expect = "successful"
         
-        
-        
-
         self.assertTrue(TestParser.test(input,expect,283))
-    def test_statement_mix_16(self):
-        
-        
-        
+    def test_statement_wrong_STATEMENT_after_DO(self):
+        input = """
+                Procedure test(A: Integer; k, X:Integer);
+                Var i :Integer;
+                BEgin
+                 For i:=N downto k+ 1 do
+                  
+                EnD
+                """
+        expect = "Error on line 7 col 16: EnD"
 
         self.assertTrue(TestParser.test(input,expect,284))
-    def test_statement_mix_16(self):
+    def test_statement_MULTI_STATEMENT(self):
         
-        input = 
-        
-
-        self.assertTrue(TestParser.test(input,expect,285))
-      
-    def test_statement_mix_42(self):
         input = """procedure foo(a,b:integer; c:real);
         var x,y: real;
         begin 
-        x := y + 1;
+        x := y + 1 := 1;
+        a := y;
+        b := a;
+        c := a;
+        end"""
+        expect = "Error on line 4 col 19: :="
+        self.assertTrue(TestParser.test(input,expect,285))
+      
+    def test_statement_wrong_EXPRESSION(self):
+        input = """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+        begin 
+        x := y + 1 := 1;
 
         end"""
-        expect = "successful"
+        expect = "Error on line 4 col 19: :="
         self.assertTrue(TestParser.test(input,expect,286))
-    def test_statement_mix_43(self):
+    def test_statement_complex_ASSIGN_and_RETURN(self):
+        """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+        begin 
+        a := b [10] := foo()[3] := x := 1 ;
+        return;
+        end"""
         input = """procedure foo(a,b:integer; c:real);
         var x,y: real;
         begin 
@@ -1286,16 +1606,24 @@ class ParserSuite(unittest.TestCase):
         end"""
         expect = "successful"
         self.assertTrue(TestParser.test(input,expect,287))
-    def test_statement_mix_44(self): 
+    def test_statement_WRONG_ASSIGN(self): 
+        """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+        begin 
+        a := b [10] := 3 := x := 1 ;
+        return;
+
+        end"""
         input = """procedure foo(a,b:integer; c:real);
         var x,y: real;
         begin 
         a := b [10] := 3 := x := 1 ;
+        return;
 
         end"""
-        expect = "successful"
+        expect = "Error on line 4 col 25: :="
         self.assertTrue(TestParser.test(input,expect,288))
-    def test_statement_mix_45(self): 
+    def test_statement_ARRAY_DECLARE(self): 
         input = """procedure foo(a,b:integer; c:real);
         var x,y: real;
             z: array[2 .. 3] of integer;
@@ -1306,7 +1634,7 @@ class ParserSuite(unittest.TestCase):
         end"""
         expect = "successful"
         self.assertTrue(TestParser.test(input,expect,289))
-    def test_statement_mix_46(self): 
+    def test_statement_FUNCCALL_as_index_express(self): 
         input = """procedure foo(a,b:integer; c:real);
         var x,y: real;
             z: array[2 .. 3] of integer;
@@ -1320,7 +1648,13 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
         self.assertTrue(TestParser.test(input,expect,290))
 
-    def test_statement_mix_47(self):     
+    def test_statement_IF_THEN(self):     
+        """procedure foo(a,b:integer; c:real);
+        var x,y: real;
+            z: array[2 .. 3] of integer;
+        begin 
+        if 5>6 then x := y;
+        end"""
         input = """procedure foo(a,b:integer; c:real);
         var x,y: real;
             z: array[2 .. 3] of integer;
@@ -1330,7 +1664,7 @@ class ParserSuite(unittest.TestCase):
         expect = "successful"
         self.assertTrue(TestParser.test(input,expect,291))
 
-    def test_statement_mix_48(self):       
+    def test_statement_IF_THEN_ELSE(self):       
         """procedure foo(a,b:integer; c:real);
         var x,y: real;
             z: array[2 .. 3] of integer;
@@ -1349,7 +1683,7 @@ class ParserSuite(unittest.TestCase):
         self.assertTrue(TestParser.test(input,expect,292))
 
        
-    def test_statement_mix_49(self):    
+    def test_statement_nested_IF_with_ASSIGN(self):    
         """procedure foo(a,b:integer; c:real);
         var x,y: real;
             z: array[2 .. 3] of integer;
@@ -1370,9 +1704,9 @@ class ParserSuite(unittest.TestCase):
         self.assertTrue(TestParser.test(input,expect,293))
 
     
-    def test_statement_mix_50(self):
-         """procedure foo(a,b:integer; c:real);
-        var x,y: real;
+    def test_statement_PROCEDURE_missing_SEMI(self):
+        """procedure foo(a,b:integer; c:real);
+        var x,y: real
             z: array[2 .. 3] of integer;
         begin 
         if (5>6) then x := y; else 
@@ -1380,16 +1714,16 @@ class ParserSuite(unittest.TestCase):
         
         end"""
         input = """procedure foo(a,b:integer; c:real);
-        var x,y: real;
+        var x,y: real
             z: array[2 .. 3] of integer;
         begin 
         if (5>6) then x := y; else 
             if (true) then y:=x;
         
         end"""
-        expect = "successful"
+        expect = "Error on line 3 col 12: z"
         self.assertTrue(TestParser.test(input,expect,294))
-    def test_wrong_miss_close_1(self):
+    def test_wrong_miss_RB(self):
         """Miss ) """
         input = """procedure foo(a,b:integer; c:real;
         var x,y: real 
@@ -1397,29 +1731,35 @@ class ParserSuite(unittest.TestCase):
         end"""
         expect = "Error on line 2 col 8: var"
         self.assertTrue(TestParser.test(input,expect,295))
-    def test_wrong_miss_close_2(self):
+
+    def test_wrong_miss_SEMI_at_VAR_DECLARE(self):
         """incorrect variable declaration 3"""
         input = """float a,c,d"""
         expect = "Error on line 1 col 0: float"
         self.assertTrue(TestParser.test(input,expect,296))
 
-    def test_array_1(self):
+    def test_ARRAY_DECLARE(self):
         """array type"""
         input = """var d:array [ 1 .. 5 ] of integer;"""
         expect = "successful"
         self.assertTrue(TestParser.test(input,expect,297))
-    def test_array_2(self):        
+    def test_array_wrong_miss_RSB(self):        
         input = """var d:array [ 1 .. 5  of integer;"""
         expect = "Error on line 1 col 22: of"
         self.assertTrue(TestParser.test(input,expect,298))
-    def test_array_3(self):    
+    def test_VAR_DECLARE_with_ARRAY(self):    
         input = """var d:array [1 .. 5] of integer; a,b,c: integer; e,f: real;"""
         expect = "successful"
         self.assertTrue(TestParser.test(input,expect,299))
-    def test_array_4(self):
+    def test_array_DECLARE_with_ESCAPE(self):
         input = """var d:array [1 .. 5] of integer;\n a,b,c: integer;\n e,f: real;"""
         expect = "successful"
         self.assertTrue(TestParser.test(input,expect,300))
-
-    #def test_expression(self):
-'''
+    def test_array_DECLARE_with_ESCAPEs(self):
+        input = """ "2"[4]:=d;"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input,expect,301))
+    def test_array_DECLARE_with_ESCAPEss(self):
+        input = """if (b>=a) and (b>=c) then max=b;"""
+        expect = "successful"
+        self.assertTrue(TestParser.test(input,expect,302))
